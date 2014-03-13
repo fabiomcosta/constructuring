@@ -1,0 +1,33 @@
+{
+  "name": "destroyer",
+  "version": "0.0.1",
+  "description": "ES6 to ES3 transpiler of the destructuring feature",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "better-assert": "~1.0.0",
+    "escodegen": "~1.3.0",
+    "escope": "~1.0.1",
+    "esprima": "~1.1.0-dev-harmony",
+    "estraverse": "~1.5.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "destructuring",
+    "destructure",
+    "es6",
+    "transformation",
+    "rewriting",
+    "transpiler",
+    "compiler",
+    "desugaring",
+    "desugar"
+  ],
+  "author": "Fabio M. Costa",
+  "license": "MIT"
+}
