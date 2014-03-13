@@ -7,8 +7,8 @@ var escodegen = require('escodegen');
 var estraverse = require('estraverse');
 var Syntax = estraverse.Syntax;
 
-var UUIDCreator = require('./UUIDCreator');
-var utils = require('./utils');
+var UUIDCreator = require('./lib/UUIDCreator');
+var utils = require('./lib/utils');
 var p = utils.p, log = utils.log;
 
 
@@ -18,24 +18,27 @@ function createTemporaryVariableDeclaration(id, value) {
     name: id
   };
   var path = this.path();
+  var parentArray = this.root;
   var closestArrayIndex;
-  for (var i = path.length; --i;) {
-    if (typeof path[i] === 'number') {
+  var i = path.length;
+
+  while (i--) {
+    if (path[i-1] === 'body' && typeof path[i] === 'number') {
       closestArrayIndex = i;
+      for (var y = 0; y < i; y++) {
+        parentArray = parentArray[path[y]];
+      }
       break;
     }
   }
-  if (closestArrayIndex == null) {
+  if (closestArrayIndex === null) {
     // This should never happen, every 'Program' root node has a 'body' array
     throw new Error(
       'Couldn\'t find a place to insert the temporary variables ' +
       'declarations.'
     );
   }
-  var parentArray = this.root;
-  for (var i = 0; i < closestArrayIndex; i++) {
-    parentArray = parentArray[path[i]];
-  }
+
   var variableDeclaration = {
     'type': Syntax.VariableDeclaration,
     'declarations': [
@@ -127,16 +130,11 @@ function rightSideIdentifier(current, node) {
 }
 
 function rightSideCallExpression(current, node, getId) {
-  var cacheVariable = {
-    type: Syntax.Identifier,
-    name: getId()
-  };
-  node.expressions.push({
-    'type': Syntax.AssignmentExpression,
-    'operator': '=',
-    'left': cacheVariable,
-    'right': current.right
-  });
+  var cacheVariable = createTemporaryVariableDeclaration.call(
+    this,
+    getId(),
+    current.right
+  );
 
   var leftElements = current.left.elements;
   var len = leftElements.length;
