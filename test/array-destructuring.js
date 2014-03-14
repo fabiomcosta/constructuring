@@ -145,8 +145,7 @@ describe('Destructuring Array', function() {
         [a, b] = [b, a];
       },
       function() {
-        var a = 1, b = 2;
-        var _$$0 = a;
+        var a = 1, b = 2, _$$0 = a;
         a = b, b = _$$0;
       }
     ).andAssert(
@@ -163,9 +162,7 @@ describe('Destructuring Array', function() {
         [a, b, c] = [c, a, b];
       },
       function() {
-        var a = 1, b = 2, c = 3;
-        var _$$1 = b;
-        var _$$0 = a;
+        var a = 1, b = 2, c = 3, _$$0 = a, _$$1 = b;
         a = c, b = _$$0, c = _$$1;
       }
     ).andAssert(
@@ -211,8 +208,7 @@ describe('Destructuring Array', function() {
         [a, b] = c();
       },
       function() {
-        var c = function () { return [, 1]; };
-        var _$$0 = c();
+        var c = function () { return [, 1]; }, _$$0 = c();
         a = _$$0[0], b = _$$0[1];
       }
     ).andAssert(
@@ -229,8 +225,7 @@ describe('Destructuring Array', function() {
         [[a, b], c] = [d(), 3];
       },
       function() {
-        var d = function () { return [, 1]; };
-        var _$$0 = d();
+        var d = function () { return [, 1]; }, _$$0 = d();
         (a = _$$0[0], b = _$$0[1]), c = 3;
       }
     ).andAssert(
@@ -278,8 +273,7 @@ describe('Destructuring Array', function() {
         [a, b] = c();
       },
       function() {
-        var c = function () { return 1; };
-        var _$$0 = c();
+        var c = function () { return 1; }, _$$0 = c();
         a = _$$0[0], b = _$$0[1];
       }
     ).andAssert(
@@ -297,8 +291,7 @@ describe('Destructuring Array', function() {
         [a, b] = c();
       },
       function() {
-        var c = function () { return null; };
-        var _$$0 = c();
+        var c = function () { return null; }, _$$0 = c();
         a = _$$0[0], b = _$$0[1];
       }
     ).checkThrows(

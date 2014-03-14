@@ -13,18 +13,15 @@ var p = utils.p, log = utils.log;
 
 
 function createTemporaryVariableDeclaration(id, value) {
-  var temporaryVariableId = {
-    type: Syntax.Identifier,
-    name: id
-  };
   var path = this.path();
   var parentArray = this.root;
-  var closestArrayIndex;
   var i = path.length;
+  var closestArrayIndex;
 
   while (i--) {
-    if (path[i-1] === 'body' && typeof path[i] === 'number') {
-      closestArrayIndex = i;
+    // function, program, blockstatement, labelstatement (etc) body
+    if (typeof path[i] === 'number' && path[i-1] === 'body') {
+      closestArrayIndex = path[i];
       for (var y = 0; y < i; y++) {
         parentArray = parentArray[path[y]];
       }
@@ -39,18 +36,30 @@ function createTemporaryVariableDeclaration(id, value) {
     );
   }
 
-  var variableDeclaration = {
-    'type': Syntax.VariableDeclaration,
-    'declarations': [
-      {
-        'type': Syntax.VariableDeclarator,
-        'id': temporaryVariableId,
-        'init': value
-      }
-    ],
-    'kind': 'var'
+  var temporaryVariableId = {
+    type: Syntax.Identifier,
+    name: id
   };
-  parentArray.splice(closestArrayIndex, 0, variableDeclaration);
+  var tempVar = {
+    'type': Syntax.VariableDeclarator,
+    'id': temporaryVariableId,
+    'init': value
+  };
+
+  // check if we can merge this temp declaration inside
+  // the previous variable declarator
+  var previousDeclaration = parentArray[closestArrayIndex-1];
+  if (previousDeclaration.type === Syntax.VariableDeclaration) {
+    previousDeclaration.declarations.push(tempVar);
+  } else {
+    var tempVarDeclaration = {
+      'type': Syntax.VariableDeclaration,
+      'declarations': [tempVar],
+      'kind': 'var'
+    };
+    parentArray.splice(closestArrayIndex, 0, tempVarDeclaration);
+  }
+
   return temporaryVariableId;
 }
 
