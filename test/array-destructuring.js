@@ -317,5 +317,26 @@ describe('Destructuring Array', function() {
       }
     );
   });
+  it.skip('should destruct more than one assignment expression', function() {
+    assertSrcEquals(
+      function() {
+        var f = function () { return [1, 2]; };
+        function garbage() {}
+        [a, b] = f();
+        [c, d] = f();
+      },
+      function() {
+        var f = function () { return [1, 2]; };
+        function garbage() { }
+        var _$$0 = f(), _$$1 = f();
+        a = _$$0[0], b = _$$0[1];
+        c = _$$1[0], d = _$$1[1];
+      }
+    ).andAssert(
+      function() {
+        a === 1 && b === 2 && c === 1 && d === 2;
+      }
+    );
+  });
 });
 

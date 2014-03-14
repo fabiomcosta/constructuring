@@ -146,9 +146,7 @@ function rightSideCallExpression(current, node, getId) {
   );
 
   var leftElements = current.left.elements;
-  var len = leftElements.length;
-
-  for (var i = 0; i < len; i++) {
+  for (var i = 0; i < leftElements.length; i++) {
     var leftElement = leftElements[i];
     node.expressions.push({
       'type': Syntax.AssignmentExpression,
@@ -240,14 +238,13 @@ propertiesMap[Syntax.VariableDeclarator] = {
 
 function transform(source, codegenOptions) {
   var ast = esprima.parse(source);
-  var uuidCreator = new UUIDCreator(ast);
+  var getId = new UUIDCreator(ast).getTemporaryUUIDCreator();
   var result = estraverse.replace(ast, {
     enter: function(node) {
       var propMap = propertiesMap[node.type];
       switch (node.type) {
         case Syntax.VariableDeclarator:
         case Syntax.AssignmentExpression:
-          var getId = uuidCreator.getTemporaryUUIDCreator();
           return rewriteAssigmentNode.call(this, node, propMap, getId);
       }
       return node;
