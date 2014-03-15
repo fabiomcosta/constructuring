@@ -168,13 +168,12 @@ function rightSideCallExpression(current, node, getId) {
 
 function rightSideLiteral(current, node, getId) {
   var leftElements = current.left.elements;
-  var len = leftElements.length;
   var undef = {
     type: Syntax.Identifier,
     name: 'undefined'
   };
 
-  for (var i = 0; i < len; i++) {
+  for (var i = 0; i < leftElements.length; i++) {
     var leftElement = leftElements[i];
     node.expressions.push({
       'type': Syntax.AssignmentExpression,
