@@ -235,8 +235,7 @@ propertiesMap[Syntax.VariableDeclarator] = {
   right: 'init'
 };
 
-function transform(source, codegenOptions) {
-  var ast = esprima.parse(source);
+function transform(ast) {
   var getId = new UUIDCreator(ast).getTemporaryUUIDCreator();
   var result = estraverse.replace(ast, {
     enter: function(node) {
@@ -249,9 +248,15 @@ function transform(source, codegenOptions) {
       return node;
     }
   });
-  return escodegen.generate(result, codegenOptions);
+  return result;
+}
+
+function transformSource(source, codegenOptions) {
+  var ast = esprima.parse(source);
+  return escodegen.generate(transform(ast), codegenOptions);
 }
 
 module.exports = {
-  transform: transform
+  transform: transform,
+  transformSource: transformSource
 };

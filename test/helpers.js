@@ -2,7 +2,7 @@
 'strict mode';
 
 var assert = require('chai').assert;
-var transform = require('../index').transform;
+var transformSource = require('../index').transformSource;
 
 
 var supportsDestructuring = (function() {
@@ -36,7 +36,7 @@ function makeSrc(fn) {
 function assertSrcEquals(referenceFn, compareFn) {
   var codegenOptions = {format: {newline: ' ', indent: {style: ''}}};
   var referenceSrc = makeSrc(referenceFn);
-  var transformedReferenceSrc = sanitizeSource(transform(referenceSrc, codegenOptions));
+  var transformedReferenceSrc = sanitizeSource(transformSource(referenceSrc, codegenOptions));
   var compareSrc = makeSrc(compareFn);
   assert.strictEqual(transformedReferenceSrc, compareSrc);
   return {
