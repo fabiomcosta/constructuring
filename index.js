@@ -63,8 +63,8 @@ function rightSideArrayExpression(current, node, getId) {
       // identifier so we can set it properly to the left identifier
       // Ex: [x, y] = [y, x]
       if (n.Identifier.check(rightElement)) {
-        for (var y = 0; y < node.expressions.length; y++) {
-          var left = node.expressions[y].left;
+        for (var y = 0; y < node.declarations.length; y++) {
+          var left = node.declarations[y].left;
           if (n.Identifier.check(left) && left.name === rightElement.name) {
             rightElement = createTemporaryVariableDeclaration.call(
               this,
@@ -77,33 +77,20 @@ function rightSideArrayExpression(current, node, getId) {
       }
     }
 
-    // NOTE update this to use ast-types. Make it support ArrayPattern
-    // as the 'left' property
-    node.expressions.push({
-      'type': Syntax.AssignmentExpression,
-      'operator': '=',
-      'left': leftElement,
-      'right': rightElement
-    });
+    node.addDeclaration(leftElement, rightElement);
   }
 }
 
 function rightSideIdentifier(current, node) {
   var leftElements = current.left.elements;
-  var len = leftElements.length;
-
-  for (var i = 0; i < len; i++) {
+  for (var i = 0; i < leftElements.length; i++) {
     var leftElement = leftElements[i];
-    var expression = b.assignmentExpression(
-      '=',
-      leftElement,
-      b.memberExpression(
-        current.right,
-        b.literal(i),
-        true // computed
-      )
+    var rightElement = b.memberExpression(
+      current.right,
+      b.literal(i),
+      true // computed
     );
-    node.expressions.push(expression);
+    node.addDeclaration(leftElement, rightElement);
   }
 }
 
@@ -113,68 +100,58 @@ function rightSideCallExpression(current, node, getId) {
     getId(),
     current.right
   );
-
   var leftElements = current.left.elements;
   for (var i = 0; i < leftElements.length; i++) {
     var leftElement = leftElements[i];
-    var expression = b.assignmentExpression(
-      '=',
-      leftElement,
-      b.memberExpression(
-        cacheVariable,
-        b.literal(i),
-        true // computed
-      )
+    var rightElement = b.memberExpression(
+      cacheVariable,
+      b.literal(i),
+      true // computed
     );
-    node.expressions.push(expression);
+    node.addDeclaration(leftElement, rightElement);
   }
 }
 
 function rightSideLiteral(current, node, getId) {
-  var leftElements = current.left.elements;
   var undef = b.identifier('undefined');
-
+  var leftElements = current.left.elements;
   for (var i = 0; i < leftElements.length; i++) {
     var leftElement = leftElements[i];
-    node.expressions.push(
-      b.assignmentExpression('=', leftElement, undef)
-    );
+    node.addDeclaration(leftElement, undef);
   }
 }
 
-function rewriteAssigmentNode(node, getId) {
+function rewriteAssigmentNode(node, declarationWrapper, getId) {
 
-  if (node.left && node.left.type === Syntax.ArrayPattern) {
+  if (node.left && n.ArrayPattern.check(node.left)) {
     if (!node.right) {
       return;
     }
 
-    var replacementNode = b.sequenceExpression([]);
-
     switch (node.right.type) {
       // Right is an array. Ex: [a, b] = [b, a];
       case Syntax.ArrayExpression:
-        rightSideArrayExpression.call(this, node, replacementNode, getId);
+        rightSideArrayExpression.call(this, node, declarationWrapper, getId);
         break;
 
       // Right is an identifier. Ex: [a, b] = c;
       case Syntax.Identifier:
-        rightSideIdentifier.call(this, node, replacementNode);
+        rightSideIdentifier.call(this, node, declarationWrapper);
         break;
 
       // Right is a function call. Ex: [a, b] = c();
       case Syntax.CallExpression:
-        rightSideCallExpression.call(this, node, replacementNode, getId);
+        rightSideCallExpression.call(this, node, declarationWrapper, getId);
         break;
 
       // Right is a literal. Ex: [a, b] = 1;
       case Syntax.Literal:
-        rightSideLiteral.call(this, node, replacementNode, getId);
+        rightSideLiteral.call(this, node, declarationWrapper, getId);
         break;
     }
 
     // recursively transforms other assignments, for nested arrays for example
-    transform(this.replace(replacementNode)[0], getId);
+    transform(this.replace.apply(this, declarationWrapper.getNodes())[0], getId);
   }
 
 }
@@ -183,13 +160,70 @@ function transform(ast, getId) {
   getId = getId || new UUIDCreator(ast).getTemporaryUUIDCreator();
 
   var result = types.traverse(ast, function(node) {
-    if (n.VariableDeclarator.check(node) || n.AssignmentExpression.check(node)) {
-      rewriteAssigmentNode.call(this, node, getId);
+    if (
+      n.VariableDeclarator.check(node) ||
+      n.AssignmentExpression.check(node)
+    ) {
+      var declarationWrapper = new DeclarationWrapper(this);
+      rewriteAssigmentNode.call(this, node, declarationWrapper, getId);
     }
   });
 
   return result;
 }
+
+// Wrapper for a VariableDeclaration or SequenceExpression node.
+// Since these nodes have different property names this class
+// contains a single API for manipulating the similar properties.
+// Defines if the wrapper will use a VariableDeclaration or SequenceExpression
+// based on `node`.
+var DeclarationWrapper = function(path) {
+  this._isVarDeclarator = n.VariableDeclarator.check(path.node);
+
+  // An AssignmentExpression not always has a SequenceExpression as parent
+  // lets check this and create one if this is false
+  var parent;
+  if (!this._isVarDeclarator && !n.SequenceExpression.check(path.parent.node)) {
+    parent = this._sequenceExpression = b.sequenceExpression([]);
+  } else {
+    parent = path.parent.node;
+  }
+  this.declarations = parent.declarations || parent.expressions;
+  this._replacements = [];
+};
+DeclarationWrapper.prototype._getAssignmentFor = function(left, right) {
+  // NOTE update this to use ast-types. Make it support ArrayPattern
+  // as the 'left' property
+  if (this._isVarDeclarator) {
+    return {
+      'type': Syntax.VariableDeclarator,
+      'id': left,
+      'init': right
+    };
+  }
+  return {
+    'type': Syntax.AssignmentExpression,
+    'operator': '=',
+    'left': left,
+    'right': right
+  };
+};
+DeclarationWrapper.prototype.addDeclaration = function(left, right) {
+  var assignment = this._getAssignmentFor(left, right);
+  if (this._sequenceExpression) {
+    this._sequenceExpression.expressions.push(assignment);
+  } else {
+    this._replacements.push(assignment);
+  }
+  return this;
+};
+DeclarationWrapper.prototype.getNodes = function() {
+  if (this._sequenceExpression) {
+    return [this._sequenceExpression];
+  }
+  return this._replacements;
+};
+
 
 function transformSource(source, codegenOptions) {
   var ast = esprima.parse(source);
