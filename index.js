@@ -56,19 +56,16 @@ function rightSideArrayExpression(current, node, getId) {
     // Sometimes there are missing or less elements on the right side
     // Ex: [a, b, c] = [,1]
     if (!rightElement) {
-      rightElement = {
-        type: Syntax.Identifier,
-        name: 'undefined'
-      };
+      rightElement = b.identifier('undefined');
     } else {
       // Verify if this identifier was a leftElement before. In this case
       // we will have to create a temporary variable to keep the value of the
       // identifier so we can set it properly to the left identifier
       // Ex: [x, y] = [y, x]
-      if (rightElement.type === Syntax.Identifier) {
+      if (n.Identifier.check(rightElement)) {
         for (var y = 0; y < node.expressions.length; y++) {
           var left = node.expressions[y].left;
-          if (left.type === Syntax.Identifier && left.name === rightElement.name) {
+          if (n.Identifier.check(left) && left.name === rightElement.name) {
             rightElement = createTemporaryVariableDeclaration.call(
               this,
               getId(),
@@ -80,6 +77,8 @@ function rightSideArrayExpression(current, node, getId) {
       }
     }
 
+    // NOTE update this to use ast-types. Make it support ArrayPattern
+    // as the 'left' property
     node.expressions.push({
       'type': Syntax.AssignmentExpression,
       'operator': '=',
@@ -95,21 +94,16 @@ function rightSideIdentifier(current, node) {
 
   for (var i = 0; i < len; i++) {
     var leftElement = leftElements[i];
-    node.expressions.push({
-      'type': Syntax.AssignmentExpression,
-      'operator': '=',
-      'left': leftElement,
-      'right': {
-        'type': Syntax.MemberExpression,
-        'computed': true,
-        'object': current.right,
-        'property': {
-          'type': Syntax.Literal,
-          'value': i,
-          'raw': String(i)
-        }
-      }
-    });
+    var expression = b.assignmentExpression(
+      '=',
+      leftElement,
+      b.memberExpression(
+        current.right,
+        b.literal(i),
+        true // computed
+      )
+    );
+    node.expressions.push(expression);
   }
 }
 
@@ -123,39 +117,28 @@ function rightSideCallExpression(current, node, getId) {
   var leftElements = current.left.elements;
   for (var i = 0; i < leftElements.length; i++) {
     var leftElement = leftElements[i];
-    node.expressions.push({
-      'type': Syntax.AssignmentExpression,
-      'operator': '=',
-      'left': leftElement,
-      'right': {
-        'type': Syntax.MemberExpression,
-        'computed': true,
-        'object': cacheVariable,
-        'property': {
-          'type': Syntax.Literal,
-          'value': i,
-          'raw': String(i)
-        }
-      }
-    });
+    var expression = b.assignmentExpression(
+      '=',
+      leftElement,
+      b.memberExpression(
+        cacheVariable,
+        b.literal(i),
+        true // computed
+      )
+    );
+    node.expressions.push(expression);
   }
 }
 
 function rightSideLiteral(current, node, getId) {
   var leftElements = current.left.elements;
-  var undef = {
-    type: Syntax.Identifier,
-    name: 'undefined'
-  };
+  var undef = b.identifier('undefined');
 
   for (var i = 0; i < leftElements.length; i++) {
     var leftElement = leftElements[i];
-    node.expressions.push({
-      'type': Syntax.AssignmentExpression,
-      'operator': '=',
-      'left': leftElement,
-      'right': undef
-    });
+    node.expressions.push(
+      b.assignmentExpression('=', leftElement, undef)
+    );
   }
 }
 

@@ -20,7 +20,7 @@ describe('Destructuring Array', function() {
       }
     );
   });
-  it.skip('should destruct 1 variable with var', function() {
+  it('should destruct 1 variable with var', function() {
     assertSrcEquals(
       'var [a] = [1];',
       function() {
