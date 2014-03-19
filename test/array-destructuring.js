@@ -317,7 +317,7 @@ describe('Destructuring Array', function() {
       }
     );
   });
-  it.skip('should destruct more than one assignment expression', function() {
+  it('should destruct more than one assignment expression', function() {
     assertSrcEquals(
       function() {
         var f = function () { return [1, 2]; };
@@ -326,9 +326,8 @@ describe('Destructuring Array', function() {
         [c, d] = f();
       },
       function() {
-        var f = function () { return [1, 2]; };
+        var f = function () { return [1, 2]; }, _$$0 = f(), _$$1 = f();
         function garbage() { }
-        var _$$0 = f(), _$$1 = f();
         a = _$$0[0], b = _$$0[1];
         c = _$$1[0], d = _$$1[1];
       }

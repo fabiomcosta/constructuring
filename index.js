@@ -11,53 +11,29 @@ var UUIDCreator = require('./lib/UUIDCreator');
 var utils = require('./lib/utils');
 var p = utils.p, log = utils.log;
 
+var types = require('ast-types');
+var n = types.namedTypes;
+var b = types.builders;
+
 
 function createTemporaryVariableDeclaration(id, value) {
-  var path = this.path();
-  var parentArray = this.root;
-  var i = path.length;
-  var closestArrayIndex;
-
-  while (i--) {
-    // function, program, blockstatement, labelstatement (etc) body
-    if (typeof path[i] === 'number' && path[i-1] === 'body') {
-      closestArrayIndex = path[i];
-      for (var y = 0; y < i; y++) {
-        parentArray = parentArray[path[y]];
-      }
-      break;
-    }
-  }
-  if (closestArrayIndex === null) {
-    // This should never happen, every 'Program' root node has a 'body' array
-    throw new Error(
-      'Couldn\'t find a place to insert the temporary variables ' +
-      'declarations.'
-    );
-  }
-
-  var temporaryVariableId = {
-    type: Syntax.Identifier,
-    name: id
-  };
-  var tempVar = {
-    'type': Syntax.VariableDeclarator,
-    'id': temporaryVariableId,
-    'init': value
-  };
+  var temporaryVariableId = b.identifier(id);
+  var tempVar = b.variableDeclarator(
+    temporaryVariableId,
+    value
+  );
 
   // check if we can merge this temp declaration inside
   // the previous variable declarator
-  var previousDeclaration = parentArray[closestArrayIndex-1];
-  if (previousDeclaration.type === Syntax.VariableDeclaration) {
-    previousDeclaration.declarations.push(tempVar);
+  var scopeNode = this.scope.node;
+  var firstDeclaration = scopeNode.body[0];
+  if (n.VariableDeclaration.check(firstDeclaration)) {
+    firstDeclaration.declarations.push(tempVar);
   } else {
-    var tempVarDeclaration = {
-      'type': Syntax.VariableDeclaration,
-      'declarations': [tempVar],
-      'kind': 'var'
-    };
-    parentArray.splice(closestArrayIndex, 0, tempVarDeclaration);
+    var tempVarDeclaration = b.variableDeclaration('var', [
+      tempVar
+    ]);
+    scopeNode.body.unshift(tempVarDeclaration);
   }
 
   return temporaryVariableId;
@@ -66,9 +42,8 @@ function createTemporaryVariableDeclaration(id, value) {
 function rightSideArrayExpression(current, node, getId) {
   var leftElements = current.left.elements;
   var rightElements = current.right.elements;
-  var len = leftElements.length;
 
-  for (var i = 0; i < len; i++) {
+  for (var i = 0; i < leftElements.length; i++) {
     var leftElement = leftElements[i];
     var rightElement = rightElements[i];
 
@@ -184,70 +159,52 @@ function rightSideLiteral(current, node, getId) {
   }
 }
 
-function rewriteAssigmentNode(current, propMap, getId) {
-  var node = current;
+function rewriteAssigmentNode(node, getId) {
 
-  if (current.left && current.left.type === Syntax.ArrayPattern) {
-    if (!current.right) {
-      return node;
+  if (node.left && node.left.type === Syntax.ArrayPattern) {
+    if (!node.right) {
+      return;
     }
 
-    node = {
-      type: Syntax.SequenceExpression,
-      expressions: []
-    };
+    var replacementNode = b.sequenceExpression([]);
 
-    switch (current.right.type) {
+    switch (node.right.type) {
       // Right is an array. Ex: [a, b] = [b, a];
       case Syntax.ArrayExpression:
-        rightSideArrayExpression.call(this, current, node, getId);
+        rightSideArrayExpression.call(this, node, replacementNode, getId);
         break;
 
       // Right is an identifier. Ex: [a, b] = c;
       case Syntax.Identifier:
-        rightSideIdentifier.call(this, current, node);
+        rightSideIdentifier.call(this, node, replacementNode);
         break;
 
       // Right is a function call. Ex: [a, b] = c();
       case Syntax.CallExpression:
-        rightSideCallExpression.call(this, current, node, getId);
+        rightSideCallExpression.call(this, node, replacementNode, getId);
         break;
 
       // Right is a literal. Ex: [a, b] = 1;
       case Syntax.Literal:
-        rightSideLiteral.call(this, current, node, getId);
+        rightSideLiteral.call(this, node, replacementNode, getId);
         break;
     }
+
+    // recursively transforms other assignments, for nested arrays for example
+    transform(this.replace(replacementNode)[0], getId);
   }
 
-  return node;
 }
 
-var propertiesMap = {};
-propertiesMap[Syntax.AssigmentExpression] = {
-  expressions: 'expressions',
-  left: 'left',
-  right: 'right'
-};
-propertiesMap[Syntax.VariableDeclarator] = {
-  expressions: 'declarations',
-  left: 'id',
-  right: 'init'
-};
+function transform(ast, getId) {
+  getId = getId || new UUIDCreator(ast).getTemporaryUUIDCreator();
 
-function transform(ast) {
-  var getId = new UUIDCreator(ast).getTemporaryUUIDCreator();
-  var result = estraverse.replace(ast, {
-    enter: function(node) {
-      var propMap = propertiesMap[node.type];
-      switch (node.type) {
-        case Syntax.VariableDeclarator:
-        case Syntax.AssignmentExpression:
-          return rewriteAssigmentNode.call(this, node, propMap, getId);
-      }
-      return node;
+  var result = types.traverse(ast, function(node) {
+    if (n.VariableDeclarator.check(node) || n.AssignmentExpression.check(node)) {
+      rewriteAssigmentNode.call(this, node, getId);
     }
   });
+
   return result;
 }
 
