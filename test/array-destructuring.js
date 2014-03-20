@@ -315,7 +315,7 @@ describe('Destructuring Array', function() {
       'TypeError: Cannot read property \'0\' of null'
     );
   });
-  it.skip('should destruct complex nested sequence expression', function() {
+  it('should destruct complex nested sequence expression', function() {
     assertSrcEquals(
       function() {
         var f = [1, 2], h = [8];

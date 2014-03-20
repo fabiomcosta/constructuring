@@ -4,8 +4,7 @@
 
 var esprima = require('esprima');
 var escodegen = require('escodegen');
-var estraverse = require('estraverse');
-var Syntax = estraverse.Syntax;
+var Syntax = esprima.Syntax;
 
 var UUIDCreator = require('./lib/UUIDCreator');
 var utils = require('./lib/utils');
@@ -150,25 +149,36 @@ function rewriteAssigmentNode(node, declarationWrapper, getId) {
         break;
     }
 
-    // recursively transforms other assignments, for nested arrays for example
-    transform(this.replace.apply(this, declarationWrapper.getNodes())[0], getId);
+    // Recursively transforms other assignments.
+    // For nested ArrayPatterns for example.
+    var replacedNodes = this.replace.apply(this, declarationWrapper.getNodes());
+    replacedNodes.forEach(function(replacedNode) {
+      types.traverse(
+        replacedNode,
+        function(node) {
+          traverse.call(this, node, getId);
+        }
+      );
+    });
   }
 
 }
 
-function transform(ast, getId) {
-  getId = getId || new UUIDCreator(ast).getTemporaryUUIDCreator();
+function traverse(node, getId) {
+  if (
+    n.VariableDeclarator.check(node) ||
+    n.AssignmentExpression.check(node)
+  ) {
+    var declarationWrapper = new DeclarationWrapper(this);
+    rewriteAssigmentNode.call(this, node, declarationWrapper, getId);
+  }
+}
 
+function transform(ast) {
+  var getId = new UUIDCreator(ast).getTemporaryUUIDCreator();
   var result = types.traverse(ast, function(node) {
-    if (
-      n.VariableDeclarator.check(node) ||
-      n.AssignmentExpression.check(node)
-    ) {
-      var declarationWrapper = new DeclarationWrapper(this);
-      rewriteAssigmentNode.call(this, node, declarationWrapper, getId);
-    }
+    traverse.call(this, node, getId);
   });
-
   return result;
 }
 
