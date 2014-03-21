@@ -277,6 +277,21 @@ describe('Destructuring Array', function() {
       }
     );
   });
+  it('should destruct when there are identifiers on the right array, ' +
+     'swapping more than one value with var', function() {
+    assertSrcEquals(
+      'var a = 1, b = 2, c = 3;' +
+      'var [a, b, c] = [c, a, b];',
+      function() {
+        var a = 1, b = 2, c = 3, _$$0 = a, _$$1 = b;
+        var a = c, b = _$$0, c = _$$1;
+      }
+    ).andAssert(
+      function() {
+        a === 3 && b === 1 && c === 2;
+      }
+    );
+  });
   it('should destruct nested arrays', function() {
     assertSrcEquals(
       function() {
@@ -291,15 +306,41 @@ describe('Destructuring Array', function() {
       }
     );
   });
+  it('should destruct nested arrays with var', function() {
+    assertSrcEquals(
+      'var [a, [b, c]] = [1, [2, 3]];',
+      function() {
+        var a = 1, b = 2, c = 3;
+      }
+    ).andAssert(
+      function() {
+        a === 1 && b === 2 && c === 3;
+      }
+    );
+  });
   it('should destruct nested arrays with repeated values', function() {
     assertSrcEquals(
       function() {
         [a, [a, b]] = [1, [2, 3]];
       },
-      // TODO: ideally it would be only "b = 2, c = 3" right?
+      // TODO: ideally it would be only "a = 2, b = 3" right?
       // This is a very edge case so I'm not sure it's worth the time
       function() {
         a = 1, a = 2, b = 3;
+      }
+    ).andAssert(
+      function() {
+        a === 2 && b === 3;
+      }
+    );
+  });
+  it('should destruct nested arrays with repeated values with var', function() {
+    assertSrcEquals(
+      'var [a, [a, b]] = [1, [2, 3]];',
+      // TODO: ideally it would be only "var a = 2, b = 3" right?
+      // This is a very edge case so I'm not sure it's worth the time
+      function() {
+        var a = 1, a = 2, b = 3;
       }
     ).andAssert(
       function() {
@@ -323,6 +364,21 @@ describe('Destructuring Array', function() {
       }
     );
   });
+  it('should destruct when there is an idenfier on the right with var',
+     function() {
+    assertSrcEquals(
+      'var c = [1, 2];' +
+      'var [a, b] = c;',
+      function() {
+        var c = [1, 2];
+        var a = c[0], b = c[1];
+      }
+    ).andAssert(
+      function() {
+        a === 1 && b === 2;
+      }
+    );
+  });
   it('should destruct when there is a function call on the right', function() {
     assertSrcEquals(
       function() {
@@ -332,6 +388,20 @@ describe('Destructuring Array', function() {
       function() {
         var c = function () { return [, 1]; }, _$$0 = c();
         a = _$$0[0], b = _$$0[1];
+      }
+    ).andAssert(
+      function() {
+        a === [][0] && b === 1;
+      }
+    );
+  });
+  it('should destruct when there is a function call on the right with var', function() {
+    assertSrcEquals(
+      'var c = function () { return [, 1]; };' +
+      'var [a, b] = c();',
+      function() {
+        var c = function () { return [, 1]; }, _$$0 = c();
+        var a = _$$0[0], b = _$$0[1];
       }
     ).andAssert(
       function() {
@@ -356,6 +426,21 @@ describe('Destructuring Array', function() {
       }
     );
   });
+  it('should destruct when there is a function call inside the array on the ' +
+     'right with var', function() {
+    assertSrcEquals(
+      'var d = function () { return [, 1]; };' +
+      'var [[a, b], c] = [d(), 3];',
+      function() {
+        var d = function () { return [, 1]; }, _$$0 = d();
+        var a = _$$0[0], b = _$$0[1], c = 3;
+      }
+    ).andAssert(
+      function() {
+        a === [][0] && b === 1 && c === 3;
+      }
+    );
+  });
   it('should destruct nested array with identifier on the right', function() {
     assertSrcEquals(
       function() {
@@ -372,6 +457,21 @@ describe('Destructuring Array', function() {
       }
     );
   });
+  it('should destruct nested array with identifier on the right with var',
+     function() {
+    assertSrcEquals(
+      'var d = [1, 2];' +
+      'var [[a, b], c] = [d, 3];',
+      function() {
+        var d = [1, 2];
+        var a = d[0], b = d[1], c = 3;
+      }
+    ).andAssert(
+      function() {
+        a === 1 && b === 2 && c === 3;
+      }
+    );
+  });
   // The values on the array pattern become undefined (Firefox 29.0a2 (2014-03-09))
   it('should destruct weird case with literal on the right', function() {
     assertSrcEquals(
@@ -380,6 +480,19 @@ describe('Destructuring Array', function() {
       },
       function() {
         a = undefined, b = undefined;
+      }
+    ).andAssert(
+      function() {
+        a === [][0] && b === [][0];
+      }
+    );
+  });
+  // The values on the array pattern become undefined (Firefox 29.0a2 (2014-03-09))
+  it('should destruct weird case with literal on the right with var', function() {
+    assertSrcEquals(
+      'var [a, b] = 1;',
+      function() {
+        var a = undefined, b = undefined;
       }
     ).andAssert(
       function() {
@@ -404,6 +517,21 @@ describe('Destructuring Array', function() {
       }
     );
   });
+  it('should destruct weird case with function call on the right that ' +
+     'returns a literal wih var', function() {
+    assertSrcEquals(
+      'var c = function () { return 1; };' +
+      'var [a, b] = c();',
+      function() {
+        var c = function () { return 1; }, _$$0 = c();
+        var a = _$$0[0], b = _$$0[1];
+      }
+    ).andAssert(
+      function() {
+        a === [][0] && b === [][0];
+      }
+    );
+  });
   // An error is thrown (Firefox 29.0a2 (2014-03-09))
   it('should destruct weird case with function call on the right that ' +
      'returns null', function() {
@@ -415,6 +543,21 @@ describe('Destructuring Array', function() {
       function() {
         var c = function () { return null; }, _$$0 = c();
         a = _$$0[0], b = _$$0[1];
+      }
+    ).checkThrows(
+      TypeError,
+      'TypeError: Cannot read property \'0\' of null'
+    );
+  });
+  // An error is thrown (Firefox 29.0a2 (2014-03-09))
+  it('should destruct weird case with function call on the right that ' +
+     'returns null with var', function() {
+    assertSrcEquals(
+      'var c = function () { return null; };' +
+      'var [a, b] = c();',
+      function() {
+        var c = function () { return null; }, _$$0 = c();
+        var a = _$$0[0], b = _$$0[1];
       }
     ).checkThrows(
       TypeError,
@@ -439,6 +582,23 @@ describe('Destructuring Array', function() {
       }
     );
   });
+  it('should destruct complex nested sequence expression with var',
+     function() {
+    assertSrcEquals(
+      'var f = [1, 2], h = [8];' +
+      'var i = function () { return; };' +
+      'var [[a, b], c, [d, e]] = [f, i(), [,5]], [g] = h;',
+      function() {
+        var f = [1, 2], h = [8];
+        var i = function () { return; };
+        var a = f[0], b = f[1], c = i(), d = undefined, e = 5, g = h[0];
+      }
+    ).andAssert(
+      function() {
+        a === 1 && b === 2 && c === [][0] && d === [][0] && e ===5 && g === 8;
+      }
+    );
+  });
   it('should destruct more than one assignment expression', function() {
     assertSrcEquals(
       function() {
@@ -452,6 +612,25 @@ describe('Destructuring Array', function() {
         function garbage() { }
         a = _$$0[0], b = _$$0[1];
         c = _$$1[0], d = _$$1[1];
+      }
+    ).andAssert(
+      function() {
+        a === 1 && b === 2 && c === 1 && d === 2;
+      }
+    );
+  });
+  it('should destruct more than one assignment expression with var',
+     function() {
+    assertSrcEquals(
+      'var f = function () { return [1, 2]; };' +
+      'function garbage() {}' +
+      'var [a, b] = f();' +
+      'var [c, d] = f();',
+      function() {
+        var f = function () { return [1, 2]; }, _$$0 = f(), _$$1 = f();
+        function garbage() { }
+        var a = _$$0[0], b = _$$0[1];
+        var c = _$$1[0], d = _$$1[1];
       }
     ).andAssert(
       function() {

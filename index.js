@@ -229,7 +229,7 @@ DeclarationWrapper.prototype.isAlreadyDeclared = function(identifier) {
     }
   }
   return false;
-}
+};
 DeclarationWrapper.prototype.addDeclaration = function(left, right) {
   var assignment = this._getAssignmentFor(left, right);
   if (this._sequenceExpression) {
