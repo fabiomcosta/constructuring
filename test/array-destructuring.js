@@ -46,6 +46,18 @@ describe('Destructuring Array', function() {
       }
     );
   });
+  it('should destruct 2 variable with var', function() {
+    assertSrcEquals(
+      'var [a, b] = [1, 2];',
+      function() {
+        var a = 1, b = 2;
+      }
+    ).andAssert(
+      function() {
+        a === 1 && b === 2;
+      }
+    );
+  });
   it('should destruct when the right array is bigger', function() {
     assertSrcEquals(
       function() {
@@ -53,6 +65,18 @@ describe('Destructuring Array', function() {
       },
       function() {
         a = 1, b = 2;
+      }
+    ).andAssert(
+      function() {
+        a === 1 && b === 2;
+      }
+    );
+  });
+  it('should destruct when the right array is bigger with var', function() {
+    assertSrcEquals(
+      'var [a, b] = [1, 2, 3];',
+      function() {
+        var a = 1, b = 2;
       }
     ).andAssert(
       function() {
@@ -75,6 +99,19 @@ describe('Destructuring Array', function() {
       }
     );
   });
+  it('should destruct when the left array is bigger with var', function() {
+    assertSrcEquals(
+      'var [a, b, c] = [1, 2];',
+      // The last value becomes undefined (Firefox 29.0a2 (2014-03-09))
+      function() {
+        var a = 1, b = 2, c = undefined;
+      }
+    ).andAssert(
+      function() {
+        a === 1 && b === 2 && c === [][0];
+      }
+    );
+  });
   it('should destruct when there are missing elements on the left array',
      function() {
     assertSrcEquals(
@@ -83,6 +120,19 @@ describe('Destructuring Array', function() {
       },
       function() {
         a = 2;
+      }
+    ).andAssert(
+      function() {
+        a === 2;
+      }
+    );
+  });
+  it('should destruct when there are missing elements on the left array ' +
+     'with var', function() {
+    assertSrcEquals(
+      'var [,a] = [1, 2];',
+      function() {
+        var a = 2;
       }
     ).andAssert(
       function() {
@@ -106,6 +156,19 @@ describe('Destructuring Array', function() {
     );
   });
   it('should destruct when there are missing elements in the middle of ' +
+     'the left array with var', function() {
+    assertSrcEquals(
+      'var [,a,,b,,,c] = [1, 2, 3, 4, 5];',
+      function() {
+        var a = 2, b = 4, c = undefined;
+      }
+    ).andAssert(
+      function() {
+        a === 2 && b === 4 && c === 0[0];
+      }
+    );
+  });
+  it('should destruct when there are missing elements in the middle of ' +
      'the right array', function() {
     assertSrcEquals(
       function() {
@@ -113,6 +176,19 @@ describe('Destructuring Array', function() {
       },
       function() {
         a = undefined, b = 1, c = undefined;
+      }
+    ).andAssert(
+      function() {
+        a === [][0] && b === 1 && c === [][0];
+      }
+    );
+  });
+  it('should destruct when there are missing elements in the middle of ' +
+     'the right array with var', function() {
+    assertSrcEquals(
+      'var [a, b, c] = [,1,,4];',
+      function() {
+        var a = undefined, b = 1, c = undefined;
       }
     ).andAssert(
       function() {
@@ -137,6 +213,21 @@ describe('Destructuring Array', function() {
       }
     );
   });
+  it('should destruct when there are identifiers on the right array with var',
+     function() {
+    assertSrcEquals(
+      'var d = 1, e = 2, f = 3;' +
+      'var [a, b, c] = [d, e, f];',
+      function() {
+        var d = 1, e = 2, f = 3;
+        var a = d, b = e, c = f;
+      }
+    ).andAssert(
+      function() {
+        d === 1 && e === 2 && f === 3 && a === d && b === e && c === f;
+      }
+    );
+  });
   it('should destruct when there are identifiers on the right array, ' +
      'swapping values', function() {
     assertSrcEquals(
@@ -147,6 +238,21 @@ describe('Destructuring Array', function() {
       function() {
         var a = 1, b = 2, _$$0 = a;
         a = b, b = _$$0;
+      }
+    ).andAssert(
+      function() {
+        a === 2 && b === 1;
+      }
+    );
+  });
+  it('should destruct when there are identifiers on the right array, ' +
+     'swapping values with var', function() {
+    assertSrcEquals(
+      'var a = 1, b = 2;' +
+      'var [a, b] = [b, a];',
+      function() {
+        var a = 1, b = 2, _$$0 = a;
+        var a = b, b = _$$0;
       }
     ).andAssert(
       function() {

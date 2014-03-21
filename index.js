@@ -59,16 +59,12 @@ function rightSideArrayExpression(node, getId) {
       // we will have to create a temporary variable to keep the value of the
       // identifier so we can set it properly to the left identifier
       // Ex: [x, y] = [y, x]
-      for (var y = 0; y < node.declarations.length; y++) {
-        var left = node.declarations[y].left;
-        if (n.Identifier.check(left) && left.name === rightElement.name) {
-          rightElement = createTemporaryVariableDeclaration.call(
-            this,
-            getId(),
-            rightElement
-          );
-          break;
-        }
+      if (node.isAlreadyDeclared(rightElement)) {
+        rightElement = createTemporaryVariableDeclaration.call(
+          this,
+          getId(),
+          rightElement
+        );
       }
     }
 
@@ -218,6 +214,22 @@ DeclarationWrapper.prototype._getAssignmentFor = function(left, right) {
     'right': right
   };
 };
+DeclarationWrapper.prototype.isAlreadyDeclared = function(identifier) {
+  var previousDeclarations;
+  if (this._sequenceExpression) {
+    previousDeclarations = this._sequenceExpression.expressions;
+  } else {
+    previousDeclarations = this._replacements;
+  }
+  for (var i = 0; i < previousDeclarations.length; i++) {
+    var declaration = previousDeclarations[i];
+    var left = declaration.left || declaration.id;
+    if (n.Identifier.check(left) && left.name === identifier.name) {
+      return true;
+    }
+  }
+  return false;
+}
 DeclarationWrapper.prototype.addDeclaration = function(left, right) {
   var assignment = this._getAssignmentFor(left, right);
   if (this._sequenceExpression) {
