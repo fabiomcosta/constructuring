@@ -1,7 +1,6 @@
 /* jshint esnext:true */
 'strict mode';
 
-var assert = require('better-assert');
 var assertSrcEquals = require('./helpers').assertSrcEquals;
 
 
@@ -91,8 +90,8 @@ describe('Destructuring Array', function() {
       },
       // The last value becomes undefined (Firefox 29.0a2 (2014-03-09))
       function() {
-        var _$$0 = [1, 2];
-        a = 1, b = 2, c = _$$0[2];
+        var $0 = [1, 2];
+        a = 1, b = 2, c = $0[2];
       }
     ).andAssert(
       function() {
@@ -237,8 +236,8 @@ describe('Destructuring Array', function() {
         [a, b] = [b, a];
       },
       function() {
-        var a = 1, b = 2, _$$0 = a;
-        a = b, b = _$$0;
+        var a = 1, b = 2, $0 = a;
+        a = b, b = $0;
       }
     ).andAssert(
       function() {
@@ -253,7 +252,7 @@ describe('Destructuring Array', function() {
       'var [a, b] = [b, a];',
       function() {
         var a = 1, b = 2;
-        var _$$0 = a, a = b, b = _$$0;
+        var $0 = a, a = b, b = $0;
       }
     ).andAssert(
       function() {
@@ -269,8 +268,8 @@ describe('Destructuring Array', function() {
         [a, b, c] = [c, a, b];
       },
       function() {
-        var a = 1, b = 2, c = 3, _$$0 = a, _$$1 = b;
-        a = c, b = _$$0, c = _$$1;
+        var a = 1, b = 2, c = 3, $0 = a, $1 = b;
+        a = c, b = $0, c = $1;
       }
     ).andAssert(
       function() {
@@ -285,7 +284,7 @@ describe('Destructuring Array', function() {
       'var [a, b, c] = [c, a, b];',
       function() {
         var a = 1, b = 2, c = 3;
-        var _$$0 = a, _$$1 = b, a = c, b = _$$0, c = _$$1;
+        var $0 = a, $1 = b, a = c, b = $0, c = $1;
       }
     ).andAssert(
       function() {
@@ -387,8 +386,8 @@ describe('Destructuring Array', function() {
         [a, b] = c();
       },
       function() {
-        var c = function () { return [, 1]; }, _$$0 = c();
-        a = _$$0[0], b = _$$0[1];
+        var c = function () { return [, 1]; }, $0 = c();
+        a = $0[0], b = $0[1];
       }
     ).andAssert(
       function() {
@@ -402,7 +401,7 @@ describe('Destructuring Array', function() {
       'var [a, b] = c();',
       function() {
         var c = function () { return [, 1]; };
-        var _$$0 = c(), a = _$$0[0], b = _$$0[1];
+        var $0 = c(), a = $0[0], b = $0[1];
       }
     ).andAssert(
       function() {
@@ -418,8 +417,8 @@ describe('Destructuring Array', function() {
         [[a, b], c] = [d(), 3];
       },
       function() {
-        var d = function () { return [, 1]; }, _$$0 = d();
-        a = _$$0[0], b = _$$0[1], c = 3;
+        var d = function () { return [, 1]; }, $0 = d();
+        a = $0[0], b = $0[1], c = 3;
       }
     ).andAssert(
       function() {
@@ -434,7 +433,7 @@ describe('Destructuring Array', function() {
       'var [[a, b], c] = [d(), 3];',
       function() {
         var d = function () { return [, 1]; };
-        var _$$0 = d(), a = _$$0[0], b = _$$0[1], c = 3;
+        var $0 = d(), a = $0[0], b = $0[1], c = 3;
       }
     ).andAssert(
       function() {
@@ -480,8 +479,8 @@ describe('Destructuring Array', function() {
         [a, b] = 1;
       },
       function() {
-        var _$$0 = 1;
-        a = _$$0[0], b = _$$0[1];
+        var $0 = 1;
+        a = $0[0], b = $0[1];
       }
     ).andAssert(
       function() {
@@ -500,8 +499,8 @@ describe('Destructuring Array', function() {
       },
       // c becomes 33 (Firefox 29.0a2 (2014-03-09))
       function() {
-        var _$$0 = 'fa';
-        a = _$$0[0], b = _$$0[1], c = _$$0[2];
+        var $0 = 'fa';
+        a = $0[0], b = $0[1], c = $0[2];
       }
     ).andAssert(
       function() {
@@ -520,7 +519,7 @@ describe('Destructuring Array', function() {
       "var [a, b, c] = 'fa';",
       // c becomes 33 (Firefox 29.0a2 (2014-03-09))
       function() {
-        var _$$0 = 'fa', a = _$$0[0], b = _$$0[1], c = _$$0[2];
+        var $0 = 'fa', a = $0[0], b = $0[1], c = $0[2];
       }
     ).andAssert(
       function() {
@@ -534,7 +533,7 @@ describe('Destructuring Array', function() {
     assertSrcEquals(
       'var [a, b] = 1;',
       function() {
-        var _$$0 = 1, a = _$$0[0], b = _$$0[1];
+        var $0 = 1, a = $0[0], b = $0[1];
       }
     ).andAssert(
       function() {
@@ -550,8 +549,8 @@ describe('Destructuring Array', function() {
         [a, b] = c();
       },
       function() {
-        var c = function () { return 1; }, _$$0 = c();
-        a = _$$0[0], b = _$$0[1];
+        var c = function () { return 1; }, $0 = c();
+        a = $0[0], b = $0[1];
       }
     ).andAssert(
       function() {
@@ -566,7 +565,7 @@ describe('Destructuring Array', function() {
       'var [a, b] = c();',
       function() {
         var c = function () { return 1; };
-        var _$$0 = c(), a = _$$0[0], b = _$$0[1];
+        var $0 = c(), a = $0[0], b = $0[1];
       }
     ).andAssert(
       function() {
@@ -583,8 +582,8 @@ describe('Destructuring Array', function() {
         [a, b] = c();
       },
       function() {
-        var c = function () { return null; }, _$$0 = c();
-        a = _$$0[0], b = _$$0[1];
+        var c = function () { return null; }, $0 = c();
+        a = $0[0], b = $0[1];
       }
     ).checkThrows(
       TypeError,
@@ -599,7 +598,7 @@ describe('Destructuring Array', function() {
       'var [a, b] = c();',
       function() {
         var c = function () { return null; };
-        var _$$0 = c(), a = _$$0[0], b = _$$0[1];
+        var $0 = c(), a = $0[0], b = $0[1];
       }
     ).checkThrows(
       TypeError,
@@ -652,9 +651,9 @@ describe('Destructuring Array', function() {
       function() {
         var f = function () { return [1, 2]; };
         function garbage() { }
-        var _$$0 = f(), _$$1 = f();
-        a = _$$0[0], b = _$$0[1];
-        c = _$$1[0], d = _$$1[1];
+        var $0 = f(), $1 = f();
+        a = $0[0], b = $0[1];
+        c = $1[0], d = $1[1];
       }
     ).andAssert(
       function() {
@@ -672,8 +671,8 @@ describe('Destructuring Array', function() {
       function() {
         var f = function () { return [1, 2]; };
         function garbage() { }
-        var _$$0 = f(), a = _$$0[0], b = _$$0[1];
-        var _$$1 = f(), c = _$$1[0], d = _$$1[1];
+        var $0 = f(), a = $0[0], b = $0[1];
+        var $1 = f(), c = $1[0], d = $1[1];
       }
     ).andAssert(
       function() {
