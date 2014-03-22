@@ -83,12 +83,12 @@ describe('Destructuring Array', function() {
       }
     );
   });
-  it.skip('should destruct when the left array is bigger', function() {
+  it('should destruct when the left array is bigger', function() {
     assertSrcEquals(
       function() {
         [a, b, c] = [1, 2];
       },
-      // The last value becomes undefined (Firefox 29.0a2 (2014-03-09))
+      // According to "Firefox 29.0a2 (2014-03-09)"
       function() {
         var $0 = [1, 2];
         a = 1, b = 2, c = $0[2];
@@ -102,9 +102,9 @@ describe('Destructuring Array', function() {
   it('should destruct when the left array is bigger with var', function() {
     assertSrcEquals(
       'var [a, b, c] = [1, 2];',
-      // The last value becomes undefined (Firefox 29.0a2 (2014-03-09))
+      // According to "Firefox 29.0a2 (2014-03-09)"
       function() {
-        var a = 1, b = 2, c = undefined;
+        var $0 = [1, 2], a = 1, b = 2, c = $0[2];
       }
     ).andAssert(
       function() {
@@ -147,7 +147,8 @@ describe('Destructuring Array', function() {
         [,a,,b,,,c] = [1, 2, 3, 4, 5];
       },
       function() {
-        a = 2, b = 4, c = undefined;
+        var $0 = [1, 2, 3, 4, 5];
+        a = 2, b = 4, c = $0[6];
       }
     ).andAssert(
       function() {
@@ -160,7 +161,7 @@ describe('Destructuring Array', function() {
     assertSrcEquals(
       'var [,a,,b,,,c] = [1, 2, 3, 4, 5];',
       function() {
-        var a = 2, b = 4, c = undefined;
+        var $0 = [1, 2, 3, 4, 5], a = 2, b = 4, c = $0[6];
       }
     ).andAssert(
       function() {
@@ -175,7 +176,8 @@ describe('Destructuring Array', function() {
         [a, b, c] = [,1,,4];
       },
       function() {
-        a = undefined, b = 1, c = undefined;
+        var $0 = [, 1, , 4];
+        a = $0[0], b = 1, c = $0[2];
       }
     ).andAssert(
       function() {
@@ -188,7 +190,7 @@ describe('Destructuring Array', function() {
     assertSrcEquals(
       'var [a, b, c] = [,1,,4];',
       function() {
-        var a = undefined, b = 1, c = undefined;
+        var $0 = [, 1, , 4], a = $0[0], b = 1, c = $0[2];
       }
     ).andAssert(
       function() {
@@ -472,7 +474,7 @@ describe('Destructuring Array', function() {
       }
     );
   });
-  // The values on the array pattern become undefined (Firefox 29.0a2 (2014-03-09))
+  // According to "Firefox 29.0a2 (2014-03-09)"
   it('should destruct weird case with literal on the right', function() {
     assertSrcEquals(
       function() {
@@ -528,7 +530,7 @@ describe('Destructuring Array', function() {
     );
     delete String.prototype[2];
   });
-  // The values on the array pattern become undefined (Firefox 29.0a2 (2014-03-09))
+  // According to "Firefox 29.0a2 (2014-03-09)"
   it('should destruct weird case with literal on the right with var', function() {
     assertSrcEquals(
       'var [a, b] = 1;',
@@ -610,12 +612,12 @@ describe('Destructuring Array', function() {
       function() {
         var f = [1, 2], h = [8];
         var i = function () { return; };
-        [[a, b], c, [d, e]] = [f, i(), [,5]], [g] = h;
+        [[a, b], c, [d, e]] = [f, i(), [, 5]], [g] = h;
       },
       function() {
         var f = [1, 2], h = [8];
-        var i = function () { return; };
-        a = f[0], b = f[1], c = i(), d = undefined, e = 5, g = h[0];
+        var i = function () { return; }, $0 = [, 5];
+        a = f[0], b = f[1], c = i(), d = $0[0], e = 5, g = h[0];
       }
     ).andAssert(
       function() {
@@ -628,11 +630,11 @@ describe('Destructuring Array', function() {
     assertSrcEquals(
       'var f = [1, 2], h = [8];' +
       'var i = function () { return; };' +
-      'var [[a, b], c, [d, e]] = [f, i(), [,5]], [g] = h;',
+      'var [[a, b], c, [d, e]] = [f, i(), [, 5]], [g] = h;',
       function() {
         var f = [1, 2], h = [8];
         var i = function () { return; };
-        var a = f[0], b = f[1], c = i(), d = undefined, e = 5, g = h[0];
+        var a = f[0], b = f[1], c = i(), $0 = [, 5], d = $0[0], e = 5, g = h[0];
       }
     ).andAssert(
       function() {

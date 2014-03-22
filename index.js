@@ -51,6 +51,7 @@ function createTemporaryVariableDeclaration(id, value) {
 function rightSideArrayExpression(node, getId) {
   var leftElements = node.left.elements;
   var rightElements = node.right.elements;
+  var cacheVariable;
 
   for (var i = 0; i < leftElements.length; i++) {
     var leftElement = leftElements[i];
@@ -65,7 +66,18 @@ function rightSideArrayExpression(node, getId) {
     // Sometimes there are missing or less elements on the right side
     // Ex: [a, b, c] = [,1]
     if (!rightElement) {
-      rightElement = b.identifier('undefined');
+      if (!cacheVariable) {
+        cacheVariable = createTemporaryVariableDeclaration.call(
+          this,
+          getId(),
+          node.right
+        );
+      }
+      rightElement = b.memberExpression(
+        cacheVariable,
+        b.literal(i),
+        true // computed
+      );
     } else if (n.Identifier.check(rightElement)) {
       // Verify if this identifier was a leftElement before. In this case
       // we will have to create a temporary variable to keep the value of the
