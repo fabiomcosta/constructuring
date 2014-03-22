@@ -207,6 +207,43 @@ function rewriteAssigmentNode(node, getId) {
 
 }
 
+function rewriteFunctionNode(node, getId) {
+  var params = node.params;
+  for (var i = 0; i < params.length; i++) {
+    var param = params[i];
+    if (n.ArrayPattern.check(param)) {
+      var id = b.identifier(getId());
+      params[i] = id;
+
+      // NOTE: is the first element from a function body always the block
+      // statement or do we have to look for the first one?
+      var firstNode = node.body.body[0];
+      var declarations;
+
+      if (n.VariableDeclaration.check(firstNode)) {
+        declarations = firstNode.declarations;
+      } else {
+        var variableDeclaration = b.variableDeclaration('var', []);
+        node.body.body.unshift(variableDeclaration);
+        declarations = variableDeclaration.declarations;
+      }
+
+      var elements = param.elements.map(function(element, i) {
+        return {
+          'type': Syntax.VariableDeclarator,
+          'id': element,
+          'init': b.memberExpression(
+            id,
+            b.literal(i),
+            true // computed
+          )
+        };
+      });
+      declarations.splice.apply(declarations, [0, 0].concat(elements));
+    }
+  }
+}
+
 function traverse(node, getId) {
   if (
     n.VariableDeclarator.check(node) ||
@@ -214,6 +251,11 @@ function traverse(node, getId) {
   ) {
     var nodeWrapper = new DeclarationWrapper(this);
     rewriteAssigmentNode.call(this, nodeWrapper, getId);
+  } else if (
+    n.FunctionDeclaration.check(node) ||
+    n.FunctionExpression.check(node)
+  ) {
+    rewriteFunctionNode.call(this, node, getId);
   }
 }
 

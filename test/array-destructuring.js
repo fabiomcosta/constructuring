@@ -686,19 +686,19 @@ describe('Destructuring Array', function() {
       }
     );
   });
-  it.skip('should destruct on function calls', function() {
+  it('should destruct on function calls', function() {
     assertSrcEquals(
       getComment(function() {/*
-        var [a, b] = (function([c, d]) {
+        var [a, b] = function ([c, d]) {
           var garbage = 88;
           return [c, d];
-        }(1, 2));
+        }([1, 2]);
       */}),
       function() {
-        var $0 = (function($1) {
+        var $0 = function ($1) {
           var c = $1[0], d = $1[1], garbage = 88;
           return [c, d];
-        }(1, 2)), a = $0[0], b = $0[1];
+        }([1, 2]), a = $0[0], b = $0[1];
       }
     ).andAssert(
       function() {
@@ -706,7 +706,24 @@ describe('Destructuring Array', function() {
       }
     );
   });
-  it.skip('should destruct on `for of` loops onsidering that a polyfill for ' +
+  it.skip('should destruct a on a loop assignment', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        while (a = f()) {
+          break;
+        }
+      */}),
+      function() {
+        while (a = f()) {
+          break;
+        }
+      }
+    ).andAssert(
+      function() {
+      }
+    );
+  });
+  it.skip('should destruct on `for of` loops considering that a polyfill for ' +
      'Iterables is included', function() {
     assertSrcEquals(
       getComment(function() {/*
