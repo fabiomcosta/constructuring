@@ -96,16 +96,23 @@ function rightSideArrayExpression(node, getId) {
   }
 }
 
-function rightSideIdentifier(node) {
+// Adds declarations that transfer the values from an identifier on the
+// right to the ones on the left ArrayPattern.
+// Ex: [a, b] = c --> a = c[0], b = c[1]
+function addTransferDeclarations(node, rightIdentifier) {
   var leftElements = node.left.elements;
   for (var i = 0; i < leftElements.length; i++) {
     var rightElement = b.memberExpression(
-      node.right,
+      rightIdentifier,
       b.literal(i),
       true // computed
     );
     node.addDeclaration(leftElements[i], rightElement);
   }
+}
+
+function rightSideIdentifier(node) {
+  addTransferDeclarations(node, node.right);
 }
 
 function rightSideCallExpression(node, getId) {
@@ -114,15 +121,7 @@ function rightSideCallExpression(node, getId) {
     getId(),
     node.right
   );
-  var leftElements = node.left.elements;
-  for (var i = 0; i < leftElements.length; i++) {
-    var rightElement = b.memberExpression(
-      cacheVariable,
-      b.literal(i),
-      true // computed
-    );
-    node.addDeclaration(leftElements[i], rightElement);
-  }
+  addTransferDeclarations(node, cacheVariable);
 }
 var rightSideLiteral = rightSideCallExpression;
 
