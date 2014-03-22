@@ -21,18 +21,30 @@ function createTemporaryVariableDeclaration(id, value) {
     temporaryVariableId,
     value
   );
-
-  // check if we can merge this temp declaration inside
-  // the previous variable declarator
-  var scopeNode = this.scope.node;
-  var firstDeclaration = scopeNode.body[0];
-  if (n.VariableDeclaration.check(firstDeclaration)) {
-    firstDeclaration.declarations.push(tempVar);
+  if (n.VariableDeclarator.check(this.node)) {
+    this.replace(tempVar, this.node);
+    // WARN: this can be dangerous and depends on internals from ast-types to
+    // work.
+    // `this.name` is the position of this node on its parent's children array
+    this.name++;
   } else {
-    var tempVarDeclaration = b.variableDeclaration('var', [tempVar]);
-    scopeNode.body.unshift(tempVarDeclaration);
+    var path = this;
+    while ((path = path.parentPath)) {
+      if (typeof path.name === 'number') {
+        var parent = path.parentPath;
+        if (parent.name === 'body') {
+          var previousNode = parent.value[path.name-1];
+          if (n.VariableDeclaration.check(previousNode)) {
+            previousNode.declarations.push(tempVar);
+          } else {
+            var tempVarDeclaration = b.variableDeclaration('var', [tempVar]);
+            parent.value.splice(path.name, 0, tempVarDeclaration);
+          }
+          break;
+        }
+      }
+    }
   }
-
   return temporaryVariableId;
 }
 
@@ -75,13 +87,12 @@ function rightSideArrayExpression(node, getId) {
 function rightSideIdentifier(node) {
   var leftElements = node.left.elements;
   for (var i = 0; i < leftElements.length; i++) {
-    var leftElement = leftElements[i];
     var rightElement = b.memberExpression(
       node.right,
       b.literal(i),
       true // computed
     );
-    node.addDeclaration(leftElement, rightElement);
+    node.addDeclaration(leftElements[i], rightElement);
   }
 }
 
@@ -93,24 +104,15 @@ function rightSideCallExpression(node, getId) {
   );
   var leftElements = node.left.elements;
   for (var i = 0; i < leftElements.length; i++) {
-    var leftElement = leftElements[i];
     var rightElement = b.memberExpression(
       cacheVariable,
       b.literal(i),
       true // computed
     );
-    node.addDeclaration(leftElement, rightElement);
+    node.addDeclaration(leftElements[i], rightElement);
   }
 }
-
-function rightSideLiteral(node, getId) {
-  var undef = b.identifier('undefined');
-  var leftElements = node.left.elements;
-  for (var i = 0; i < leftElements.length; i++) {
-    var leftElement = leftElements[i];
-    node.addDeclaration(leftElement, undef);
-  }
-}
+var rightSideLiteral = rightSideCallExpression;
 
 function rewriteAssigmentNode(node, getId) {
 
