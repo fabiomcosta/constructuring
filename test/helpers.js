@@ -33,6 +33,14 @@ function makeSrc(fn) {
   return sanitizeSource(src);
 }
 
+function getComment(f) {
+  return sanitizeSource(
+    f.toString().
+      replace(/^[^\/]+\/\*/, '').
+      replace(/\*\/[^\/]+$/, '')
+  );
+}
+
 function assertSrcEquals(referenceFn, compareFn) {
   var codegenOptions = {format: {newline: ' ', indent: {style: ''}}};
   var referenceSrc = makeSrc(referenceFn);
@@ -90,7 +98,9 @@ function assertSrcEquals(referenceFn, compareFn) {
   };
 }
 
+
 module.exports = {
   assertSrcEquals: assertSrcEquals,
-  makeSrc: makeSrc
+  makeSrc: makeSrc,
+  getComment: getComment
 };

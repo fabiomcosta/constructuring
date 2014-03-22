@@ -1,7 +1,9 @@
 /* jshint esnext:true */
 'strict mode';
 
-var assertSrcEquals = require('./helpers').assertSrcEquals;
+var _helpers = require('./helpers');
+var assertSrcEquals = _helpers.assertSrcEquals;
+var getComment = _helpers.getComment;
 
 
 describe('Destructuring Array', function() {
@@ -666,10 +668,12 @@ describe('Destructuring Array', function() {
   it('should destruct more than one assignment expression with var',
      function() {
     assertSrcEquals(
-      'var f = function () { return [1, 2]; };' +
-      'function garbage() {}' +
-      'var [a, b] = f();' +
-      'var [c, d] = f();',
+      getComment(function() {/*
+        var f = function () { return [1, 2]; };
+        function garbage() {}
+        var [a, b] = f();
+        var [c, d] = f();
+      */}),
       function() {
         var f = function () { return [1, 2]; };
         function garbage() { }
@@ -679,6 +683,40 @@ describe('Destructuring Array', function() {
     ).andAssert(
       function() {
         a === 1 && b === 2 && c === 1 && d === 2;
+      }
+    );
+  });
+  it.skip('should destruct on function calls', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        var [a, b] = (function([c, d]) {
+          var garbage = 88;
+          return [c, d];
+        }(1, 2));
+      */}),
+      function() {
+        var $0 = (function($1) {
+          var c = $1[0], d = $1[1], garbage = 88;
+          return [c, d];
+        }(1, 2)), a = $0[0], b = $0[1];
+      }
+    ).andAssert(
+      function() {
+        a === 1 && b === 2;
+      }
+    );
+  });
+  it.skip('should destruct on `for of` loops onsidering that a polyfill for ' +
+     'Iterables is included', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        for (var [a, b] of [[1, 2], [3, 4]]) {
+        }
+      */}),
+      function() {
+      }
+    ).andAssert(
+      function() {
       }
     );
   });

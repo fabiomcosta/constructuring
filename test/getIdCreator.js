@@ -2,11 +2,7 @@
 'strict mode';
 
 var assert = require('chai').assert;
-var esprima = require('esprima');
-
-var transform = require('../index').transform;
 var getIdCreator = require('../lib/getIdCreator');
-var makeSrc = require('./helpers').makeSrc;
 
 
 describe('getIdCreator', function() {
