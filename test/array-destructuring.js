@@ -686,7 +686,7 @@ describe('Destructuring Array', function() {
       }
     );
   });
-  it('should destruct on function calls', function() {
+  it('should destruct function arguments', function() {
     assertSrcEquals(
       getComment(function() {/*
         var [a, b] = function ([c, d]) {
@@ -703,6 +703,25 @@ describe('Destructuring Array', function() {
     ).andAssert(
       function() {
         a === 1 && b === 2;
+      }
+    );
+  });
+  it('should destruct function arguments nested', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        var [a, b] = function ([c, [d, e]]) {
+          return [c, d];
+        }([1, 2]);
+      */}),
+      function() {
+        var $0 = function ($1) {
+          var c = $1[0], $2 = $1[1], d = $2[0], e = $2[1];
+          return [c, d];
+        }([1, 2]), a = $0[0], b = $0[1];
+      }
+    ).andAssert(
+      function() {
+        a === 1 && b === [][0];
       }
     );
   });

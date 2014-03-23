@@ -158,24 +158,23 @@ function rewriteAssigmentNode(node, getId) {
 
     if (n.ArrayPattern.check(node.left)) {
       switch (node.right.type) {
-        // Right is an array. Ex: [a, b] = [b, a];
+        // [a, b] = [b, a];
         case Syntax.ArrayExpression:
           rightSideArrayExpression.call(this, node, getId);
           break;
 
-        // Right is an identifier. Ex: [a, b] = c;
+        // [a, b] = c;
         case Syntax.Identifier:
           rightSideIdentifier.call(this, node);
           break;
 
-        // Right is a function call. Ex: [a, b] = c();
+        // [a, b] = c[0];
+        case Syntax.MemberExpression:
+        // [a, b] = c();
         case Syntax.CallExpression:
-          rightSideCallExpression.call(this, node, getId);
-          break;
-
-        // Right is a literal. Ex: [a, b] = 1;
+        // [a, b] = 1;
         case Syntax.Literal:
-          rightSideLiteral.call(this, node, getId);
+          rightSideCallExpression.call(this, node, getId);
           break;
       }
 
@@ -239,8 +238,15 @@ function rewriteFunctionNode(node, getId) {
           )
         };
       });
-      declarations.splice.apply(declarations, [0, 0].concat(elements));
+      declarations.unshift.apply(declarations, elements);
     }
+
+    types.traverse(
+      node.body.body[0],
+      function(node) {
+        traverse.call(this, node, getId);
+      }
+    );
   }
 }
 
