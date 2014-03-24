@@ -725,20 +725,19 @@ describe('Destructuring Array', function() {
       }
     );
   });
-  it.skip('should destruct a on a loop assignment', function() {
+  it.skip('should destruct inside a loop assignment', function() {
     assertSrcEquals(
-      getComment(function() {/*
-        while (a = f()) {
-          break;
-        }
-      */}),
       function() {
-        while (a = f()) {
-          break;
-        }
+        var x = [[1, 2], [3, 4]], i = 2, a, b;
+        while (i && ([a, b] = x[--i])) { }
+      },
+      function() {
+        var x = [[1, 2], [3, 4]], i = 2, a, b, $0;
+        while (i && ($0 = x[--i], (a = $0[0], b = $0[1]))) { }
       }
     ).andAssert(
       function() {
+        a === 1 && b === 2;
       }
     );
   });
