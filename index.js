@@ -15,17 +15,19 @@ var utils = require('./lib/utils');
 var p = utils.p, log = utils.log;
 
 
-function createTemporaryVariableDeclaration(id, value) {
+function createTemporaryVariableDeclaration(node, id, value) {
+  var tempVar;
   var temporaryVariableId = b.identifier(id);
-  var tempVar = b.variableDeclarator(
-    temporaryVariableId,
-    value
-  );
   if (n.VariableDeclarator.check(this.node)) {
+    tempVar = b.variableDeclarator(
+      temporaryVariableId,
+      value
+    );
     this.replace(tempVar, this.node);
     // WARN: this can be dangerous and depends on internals from ast-types to
     // work.
-    // `this.name` is the position of this node on its parent's children array
+    // `this.name` is the position of this node on its parent's children array,
+    // it's used on `this.replace` as the initial index that will be replaced.
     this.name++;
   } else {
     var path = this;
@@ -34,6 +36,7 @@ function createTemporaryVariableDeclaration(id, value) {
         var parent = path.parentPath;
         if (parent.name === 'body') {
           var previousNode = parent.value[path.name-1];
+          tempVar = b.variableDeclarator(temporaryVariableId, null);
           if (n.VariableDeclaration.check(previousNode)) {
             previousNode.declarations.push(tempVar);
           } else {
@@ -44,6 +47,10 @@ function createTemporaryVariableDeclaration(id, value) {
         }
       }
     }
+    if (!path) {
+      throw new Error('No block body could be found as parent of this node.');
+    }
+    node.unshiftDeclaration(temporaryVariableId, value);
   }
   return temporaryVariableId;
 }
@@ -59,7 +66,7 @@ function addTransferDeclarations(node, rightIdentifier) {
       b.literal(i),
       true // computed
     );
-    node.addDeclaration(leftElements[i], rightElement);
+    node.pushDeclaration(leftElements[i], rightElement);
   }
 }
 
@@ -84,6 +91,7 @@ function rightSideArrayExpression(node, getId) {
       if (!cacheVariable) {
         cacheVariable = createTemporaryVariableDeclaration.call(
           this,
+          node,
           getId(),
           node.right
         );
@@ -101,13 +109,14 @@ function rightSideArrayExpression(node, getId) {
       if (node.isAlreadyDeclared(rightElement)) {
         rightElement = createTemporaryVariableDeclaration.call(
           this,
+          node,
           getId(),
           rightElement
         );
       }
     }
 
-    node.addDeclaration(leftElement, rightElement);
+    node.pushDeclaration(leftElement, rightElement);
   }
 }
 
@@ -115,16 +124,15 @@ function rightSideIdentifier(node) {
   addTransferDeclarations(node, node.right);
 }
 
-function rightSideCallExpression(node, getId) {
+function rightSideCache(node, getId) {
   var cacheVariable = createTemporaryVariableDeclaration.call(
     this,
+    node,
     getId(),
     node.right
   );
   addTransferDeclarations(node, cacheVariable);
 }
-var rightSideLiteral = rightSideCallExpression;
-
 
 function ObjectLookupPropertyWithKey(objectExpression, key) {
   for (var i = 0; i < objectExpression.length; i++) {
@@ -145,7 +153,7 @@ function rightSideObjectExpression(node, getId) {
       rightProperties,
       leftProperty.key
     );
-    node.addDeclaration(leftProperty.key, rightProperty.value);
+    node.pushDeclaration(leftProperty.key, rightProperty.value);
   }
 }
 
@@ -169,12 +177,13 @@ function rewriteAssigmentNode(node, getId) {
           break;
 
         // [a, b] = c[0];
+        // [a, b] = c.prop;
         case Syntax.MemberExpression:
         // [a, b] = c();
         case Syntax.CallExpression:
         // [a, b] = 1;
         case Syntax.Literal:
-          rightSideCallExpression.call(this, node, getId);
+          rightSideCache.call(this, node, getId);
           break;
       }
 
