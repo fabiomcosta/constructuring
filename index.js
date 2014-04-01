@@ -42,6 +42,9 @@ function createTemporaryVariableDeclaration(node, id, value) {
           } else {
             var tempVarDeclaration = b.variableDeclaration('var', [tempVar]);
             parent.value.splice(path.name, 0, tempVarDeclaration);
+            // since we added one more element, we have to update this
+            // element's index (name) on the parent's array
+            path.name++;
           }
           break;
         }
@@ -61,12 +64,16 @@ function createTemporaryVariableDeclaration(node, id, value) {
 function addTransferDeclarations(node, rightIdentifier) {
   var leftElements = node.left.elements;
   for (var i = 0; i < leftElements.length; i++) {
+    var leftElement = leftElements[i];
+    if (!leftElement) {
+      continue;
+    }
     var rightElement = b.memberExpression(
       rightIdentifier,
       b.literal(i),
       true // computed
     );
-    node.pushDeclaration(leftElements[i], rightElement);
+    node.pushDeclaration(leftElement, rightElement);
   }
 }
 
@@ -87,7 +94,7 @@ function rightSideArrayExpression(node, getId) {
 
     // Sometimes there are missing or less elements on the right side
     // Ex: [a, b, c] = [,1]
-    if (!rightElement) {
+    if (!rightElement || !n.Literal.check(rightElement)) {
       if (!cacheVariable) {
         cacheVariable = createTemporaryVariableDeclaration.call(
           this,
@@ -101,19 +108,6 @@ function rightSideArrayExpression(node, getId) {
         b.literal(i),
         true // computed
       );
-    } else if (n.Identifier.check(rightElement)) {
-      // Verify if this identifier was a leftElement before. In this case
-      // we will have to create a temporary variable to keep the value of the
-      // identifier so we can set it properly to the left identifier
-      // Ex: [x, y] = [y, x]
-      if (node.isAlreadyDeclared(rightElement)) {
-        rightElement = createTemporaryVariableDeclaration.call(
-          this,
-          node,
-          getId(),
-          rightElement
-        );
-      }
     }
 
     node.pushDeclaration(leftElement, rightElement);

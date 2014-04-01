@@ -208,8 +208,8 @@ describe('Destructuring Array', function() {
         [a, b, c] = [d, e, f];
       },
       function() {
-        var d = 1, e = 2, f = 3;
-        a = d, b = e, c = f;
+        var d = 1, e = 2, f = 3, $0;
+        $0 = [d, e, f], a = $0[0], b = $0[1], c = $0[2];
       }
     ).andAssert(
       function() {
@@ -224,7 +224,7 @@ describe('Destructuring Array', function() {
       'var [a, b, c] = [d, e, f];',
       function() {
         var d = 1, e = 2, f = 3;
-        var a = d, b = e, c = f;
+        var $0 = [d, e, f], a = $0[0], b = $0[1], c = $0[2];
       }
     ).andAssert(
       function() {
@@ -241,7 +241,7 @@ describe('Destructuring Array', function() {
       },
       function() {
         var a = 1, b = 2, $0;
-        $0 = a, a = b, b = $0;
+        $0 = [b, a], a = $0[0], b = $0[1];
       }
     ).andAssert(
       function() {
@@ -256,7 +256,7 @@ describe('Destructuring Array', function() {
       'var [a, b] = [b, a];',
       function() {
         var a = 1, b = 2;
-        var $0 = a, a = b, b = $0;
+        var $0 = [b, a], a = $0[0], b = $0[1];
       }
     ).andAssert(
       function() {
@@ -272,8 +272,8 @@ describe('Destructuring Array', function() {
         [a, b, c] = [c, a, b];
       },
       function() {
-        var a = 1, b = 2, c = 3, $0, $1;
-        $1 = b, $0 = a, a = c, b = $0, c = $1;
+        var a = 1, b = 2, c = 3, $0;
+        $0 = [c, a, b], a = $0[0], b = $0[1], c = $0[2];
       }
     ).andAssert(
       function() {
@@ -282,15 +282,47 @@ describe('Destructuring Array', function() {
     );
   });
   it('should destruct when there are identifiers on the right array, ' +
-     'swapping more than one value on a nested array');
-  it('should destruct when there are identifiers on the right array, ' +
      'swapping more than one value with var', function() {
     assertSrcEquals(
       'var a = 1, b = 2, c = 3;' +
       'var [a, b, c] = [c, a, b];',
       function() {
         var a = 1, b = 2, c = 3;
-        var $0 = a, $1 = b, a = c, b = $0, c = $1;
+        var $0 = [c, a, b], a = $0[0], b = $0[1], c = $0[2];
+      }
+    ).andAssert(
+      function() {
+        a === 3 && b === 1 && c === 2;
+      }
+    );
+  });
+  it('should destruct when there are identifiers on the right array, ' +
+     'swapping more than one value on a nested array', function() {
+    assertSrcEquals(
+      function() {
+        var a = 1, b = 2, c = 3;
+        [a, [b, c]] = [c, [a, b]];
+      },
+      function() {
+        var a = 1, b = 2, c = 3, $0, $1;
+        $0 = [c, [a, b]], a = $0[0], $1 = $0[1], b = $1[0], c = $1[1];
+      }
+    ).andAssert(
+      function() {
+        a === 3 && b === 1 && c === 2;
+      }
+    );
+  });
+  it('should destruct when there are identifiers on the right array, ' +
+     'swapping more than one value on a nested array with var', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        var a = 1, b = 2, c = 3;
+        var [a, [b, c]] = [c, [a, b]];
+      */}),
+      function() {
+        var a = 1, b = 2, c = 3;
+        var $0 = [c, [a, b]], a = $0[0], $1 = $0[1], b = $1[0], c = $1[1];
       }
     ).andAssert(
       function() {
@@ -304,7 +336,8 @@ describe('Destructuring Array', function() {
         [a, [b, c]] = [1, [2, 3]];
       },
       function() {
-        a = 1, b = 2, c = 3;
+        var $0, $1;
+        $0 = [1, [2, 3]], a = 1, $1 = $0[1], b = $1[0], c = $1[1];
       }
     ).andAssert(
       function() {
@@ -316,7 +349,7 @@ describe('Destructuring Array', function() {
     assertSrcEquals(
       'var [a, [b, c]] = [1, [2, 3]];',
       function() {
-        var a = 1, b = 2, c = 3;
+        var $0 = [1, [2, 3]], a = 1, $1 = $0[1], b = $1[0], c = $1[1];
       }
     ).andAssert(
       function() {
@@ -332,7 +365,8 @@ describe('Destructuring Array', function() {
       // TODO: ideally it would be only "a = 2, b = 3" right?
       // This is a very edge case so I'm not sure it's worth the time
       function() {
-        a = 1, a = 2, b = 3;
+        var $0, $1;
+        $0 = [1, [2, 3]], a = 1, $1 = $0[1], a = $1[0], b = $1[1];
       }
     ).andAssert(
       function() {
@@ -346,7 +380,7 @@ describe('Destructuring Array', function() {
       // TODO: ideally it would be only "var a = 2, b = 3" right?
       // This is a very edge case so I'm not sure it's worth the time
       function() {
-        var a = 1, a = 2, b = 3;
+        var $0 = [1, [2, 3]], a = 1, $1 = $0[1], a = $1[0], b = $1[1];
       }
     ).andAssert(
       function() {
@@ -415,6 +449,23 @@ describe('Destructuring Array', function() {
       }
     );
   });
+  it('should destruct when there is a function call on the right and a ' +
+     'missing element on the left', function() {
+    assertSrcEquals(
+      function() {
+        var d = function () { return [, 1]; };
+        [a, b,, c] = d();
+      },
+      function() {
+        var d = function () { return [, 1]; }, $0;
+        $0 = d(), a = $0[0], b = $0[1], c = $0[3];
+      }
+    ).andAssert(
+      function() {
+        a === [][0] && b === 1;
+      }
+    );
+  });
   it('should destruct when there is a function call inside the array on the ' +
      'right', function() {
     assertSrcEquals(
@@ -423,8 +474,8 @@ describe('Destructuring Array', function() {
         [[a, b], c] = [d(), 3];
       },
       function() {
-        var d = function () { return [, 1]; }, $0;
-        $0 = d(), a = $0[0], b = $0[1], c = 3;
+        var d = function () { return [, 1]; }, $0, $1;
+        $0 = [d(), 3], $1 = $0[0], a = $1[0], b = $1[1], c = 3;
       }
     ).andAssert(
       function() {
@@ -439,7 +490,7 @@ describe('Destructuring Array', function() {
       'var [[a, b], c] = [d(), 3];',
       function() {
         var d = function () { return [, 1]; };
-        var $0 = d(), a = $0[0], b = $0[1], c = 3;
+        var $0 = [d(), 3], $1 = $0[0], a = $1[0], b = $1[1], c = 3;
       }
     ).andAssert(
       function() {
@@ -454,8 +505,8 @@ describe('Destructuring Array', function() {
         [[a, b], c] = [d, 3];
       },
       function() {
-        var d = [1, 2];
-        a = d[0], b = d[1], c = 3;
+        var d = [1, 2], $0, $1;
+        $0 = [d, 3], $1 = $0[0], a = $1[0], b = $1[1], c = 3;
       }
     ).andAssert(
       function() {
@@ -470,7 +521,7 @@ describe('Destructuring Array', function() {
       'var [[a, b], c] = [d, 3];',
       function() {
         var d = [1, 2];
-        var a = d[0], b = d[1], c = 3;
+        var $0 = [d, 3], $1 = $0[0], a = $1[0], b = $1[1], c = 3;
       }
     ).andAssert(
       function() {
@@ -620,8 +671,9 @@ describe('Destructuring Array', function() {
       },
       function() {
         var f = [1, 2], h = [8];
-        var i = function () { return; }, $0;
-        a = f[0], b = f[1], c = i(), $0 = [, 5], d = $0[0], e = 5, g = h[0];
+        var i = function () { return; }, $0, $1, $2;
+        $0 = [f, i(), [, 5]], $1 = $0[0], a = $1[0], b = $1[1],
+          c = $0[1], $2 = $0[2], d = $2[0], e = $2[1], g = h[0];
       }
     ).andAssert(
       function() {
@@ -638,7 +690,8 @@ describe('Destructuring Array', function() {
       function() {
         var f = [1, 2], h = [8];
         var i = function () { return; };
-        var a = f[0], b = f[1], c = i(), $0 = [, 5], d = $0[0], e = 5, g = h[0];
+        var $0 = [f, i(), [, 5]], $1 = $0[0], a = $1[0], b = $1[1],
+          c = $0[1], $2 = $0[2], d = $2[0], e = $2[1], g = h[0];
       }
     ).andAssert(
       function() {
@@ -740,6 +793,21 @@ describe('Destructuring Array', function() {
     ).andAssert(
       function() {
         a === 1 && b === 2;
+      }
+    );
+  });
+  it.skip('should destruct and the resulting expression should return ' +
+          'should return the initial right value', function() {
+    assertSrcEquals(
+      function() {
+        var c = ([a, b] = [1, 2]);
+      },
+      function() {
+        var c = ([a, b] = [1, 2]);
+      }
+    ).andAssert(
+      function() {
+        a === 1 && b === 2 && c[0] === 1 && c[1] === 2;
       }
     );
   });
