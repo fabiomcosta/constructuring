@@ -12,8 +12,11 @@ describe('Destructuring Array', function() {
       function() {
         [a] = [1];
       },
+      // ideally a = 1;
+      // ^ kinda complicated because you have to make the return
+      // value is discarded. (just like all the next Assignment test cases)
       function() {
-        a = 1;
+        var $0; $0 = [1], a = $0[0], $0;
       }
     ).andAssert(
       function() {
@@ -24,8 +27,9 @@ describe('Destructuring Array', function() {
   it('should destruct 1 variable with var', function() {
     assertSrcEquals(
       'var [a] = [1];',
+      // ideally var a = 1;
       function() {
-        var a = 1;
+        var $0 = [1], a = $0[0];
       }
     ).andAssert(
       function() {
@@ -38,8 +42,9 @@ describe('Destructuring Array', function() {
       function() {
         [a, b] = [1, 2];
       },
+      // ideally a = 1, b = 2;
       function() {
-        a = 1, b = 2;
+        var $0; $0 = [1, 2], a = $0[0], b = $0[1], $0;
       }
     ).andAssert(
       function() {
@@ -50,8 +55,9 @@ describe('Destructuring Array', function() {
   it('should destruct 2 variable with var', function() {
     assertSrcEquals(
       'var [a, b] = [1, 2];',
+      // ideally var a = 1, b = 2;
       function() {
-        var a = 1, b = 2;
+        var $0 = [1, 2], a = $0[0], b = $0[1];
       }
     ).andAssert(
       function() {
@@ -64,8 +70,9 @@ describe('Destructuring Array', function() {
       function() {
         [a, b] = [1, 2, 3];
       },
+      // ideally a = 1, b = 2;
       function() {
-        a = 1, b = 2;
+        var $0; $0 = [1, 2, 3], a = $0[0], b = $0[1], $0;
       }
     ).andAssert(
       function() {
@@ -76,8 +83,9 @@ describe('Destructuring Array', function() {
   it('should destruct when the right array is bigger with var', function() {
     assertSrcEquals(
       'var [a, b] = [1, 2, 3];',
+      // ideally var a = 1, b = 2;
       function() {
-        var a = 1, b = 2;
+        var $0 = [1, 2, 3], a = $0[0], b = $0[1];
       }
     ).andAssert(
       function() {
@@ -91,9 +99,10 @@ describe('Destructuring Array', function() {
         [a, b, c] = [1, 2];
       },
       // According to "Firefox 29.0a2 (2014-03-09)"
+      // ideally var $0; $0 = [1, 2], a = 1, b = 2, c = $0[2];
       function() {
         var $0;
-        $0 = [1, 2], a = 1, b = 2, c = $0[2];
+        $0 = [1, 2], a = $0[0], b = $0[1], c = $0[2], $0;
       }
     ).andAssert(
       function() {
@@ -105,8 +114,9 @@ describe('Destructuring Array', function() {
     assertSrcEquals(
       'var [a, b, c] = [1, 2];',
       // According to "Firefox 29.0a2 (2014-03-09)"
+      // ideally var $0 = [1, 2], a = 1, b = 2, c = $0[2];
       function() {
-        var $0 = [1, 2], a = 1, b = 2, c = $0[2];
+        var $0 = [1, 2], a = $0[0], b = $0[1], c = $0[2];
       }
     ).andAssert(
       function() {
@@ -120,8 +130,9 @@ describe('Destructuring Array', function() {
       function() {
         [,a] = [1, 2];
       },
+      // ideally a = 2;
       function() {
-        a = 2;
+        var $0; $0 = [1, 2], a = $0[1], $0;
       }
     ).andAssert(
       function() {
@@ -133,8 +144,9 @@ describe('Destructuring Array', function() {
      'with var', function() {
     assertSrcEquals(
       'var [,a] = [1, 2];',
+      // ideally var a = 2;
       function() {
-        var a = 2;
+        var $0 = [1, 2], a = $0[1];
       }
     ).andAssert(
       function() {
@@ -148,9 +160,10 @@ describe('Destructuring Array', function() {
       function() {
         [,a,,b,,,c] = [1, 2, 3, 4, 5];
       },
+      // ideally var $0; $0 = [1, 2, 3, 4, 5], a = 2, b = 4, c = $0[6];
       function() {
         var $0;
-        $0 = [1, 2, 3, 4, 5], a = 2, b = 4, c = $0[6];
+        $0 = [1, 2, 3, 4, 5], a = $0[1], b = $0[3], c = $0[6], $0;
       }
     ).andAssert(
       function() {
@@ -162,8 +175,9 @@ describe('Destructuring Array', function() {
      'the left array with var', function() {
     assertSrcEquals(
       'var [,a,,b,,,c] = [1, 2, 3, 4, 5];',
+      // ideally var $0 = [1, 2, 3, 4, 5], a = 2, b = 4, c = $0[6];
       function() {
-        var $0 = [1, 2, 3, 4, 5], a = 2, b = 4, c = $0[6];
+        var $0 = [1, 2, 3, 4, 5], a = $0[1], b = $0[3], c = $0[6];
       }
     ).andAssert(
       function() {
@@ -177,9 +191,10 @@ describe('Destructuring Array', function() {
       function() {
         [a, b, c] = [,1,,4];
       },
+      // ideally var $0; $0 = [, 1, , 4], a = $0[0], b = 1, c = $0[2];
       function() {
         var $0;
-        $0 = [, 1, , 4], a = $0[0], b = 1, c = $0[2];
+        $0 = [, 1, , 4], a = $0[0], b = $0[1], c = $0[2], $0;
       }
     ).andAssert(
       function() {
@@ -191,8 +206,9 @@ describe('Destructuring Array', function() {
      'the right array with var', function() {
     assertSrcEquals(
       'var [a, b, c] = [,1,,4];',
+      // ideally var $0 = [, 1, , 4], a = $0[0], b = 1, c = $0[2];
       function() {
-        var $0 = [, 1, , 4], a = $0[0], b = 1, c = $0[2];
+        var $0 = [, 1, , 4], a = $0[0], b = $0[1], c = $0[2];
       }
     ).andAssert(
       function() {
@@ -209,7 +225,7 @@ describe('Destructuring Array', function() {
       },
       function() {
         var d = 1, e = 2, f = 3, $0;
-        $0 = [d, e, f], a = $0[0], b = $0[1], c = $0[2];
+        $0 = [d, e, f], a = $0[0], b = $0[1], c = $0[2], $0;
       }
     ).andAssert(
       function() {
@@ -241,7 +257,7 @@ describe('Destructuring Array', function() {
       },
       function() {
         var a = 1, b = 2, $0;
-        $0 = [b, a], a = $0[0], b = $0[1];
+        $0 = [b, a], a = $0[0], b = $0[1], $0;
       }
     ).andAssert(
       function() {
@@ -273,7 +289,7 @@ describe('Destructuring Array', function() {
       },
       function() {
         var a = 1, b = 2, c = 3, $0;
-        $0 = [c, a, b], a = $0[0], b = $0[1], c = $0[2];
+        $0 = [c, a, b], a = $0[0], b = $0[1], c = $0[2], $0;
       }
     ).andAssert(
       function() {
@@ -296,7 +312,7 @@ describe('Destructuring Array', function() {
       }
     );
   });
-  it('should destruct when there are identifiers on the right array, ' +
+  it.skip('should destruct when there are identifiers on the right array, ' +
      'swapping more than one value on a nested array', function() {
     assertSrcEquals(
       function() {
@@ -305,7 +321,7 @@ describe('Destructuring Array', function() {
       },
       function() {
         var a = 1, b = 2, c = 3, $0, $1;
-        $0 = [c, [a, b]], a = $0[0], $1 = $0[1], b = $1[0], c = $1[1];
+        $0 = [c, [a, b]], a = $0[0], $1 = $0[1], b = $1[0], c = $1[1], $0;
       }
     ).andAssert(
       function() {
@@ -330,14 +346,17 @@ describe('Destructuring Array', function() {
       }
     );
   });
-  it('should destruct nested arrays', function() {
+  it.skip('should destruct nested arrays', function() {
     assertSrcEquals(
       function() {
         [a, [b, c]] = [1, [2, 3]];
       },
+      // ideally
+      // var $0, $1;
+      // $0 = [1, [2, 3]], a = 1, $1 = $0[1], b = $1[0], c = $1[1];
       function() {
         var $0, $1;
-        $0 = [1, [2, 3]], a = 1, $1 = $0[1], b = $1[0], c = $1[1];
+        $0 = [1, [2, 3]], a = $0[0], $1 = $0[1], b = $1[0], c = $1[1], $0;
       }
     ).andAssert(
       function() {
@@ -348,8 +367,9 @@ describe('Destructuring Array', function() {
   it('should destruct nested arrays with var', function() {
     assertSrcEquals(
       'var [a, [b, c]] = [1, [2, 3]];',
+      // ideally var $0 = [1, [2, 3]], a = 1, $1 = $0[1], b = $1[0], c = $1[1];
       function() {
-        var $0 = [1, [2, 3]], a = 1, $1 = $0[1], b = $1[0], c = $1[1];
+        var $0 = [1, [2, 3]], a = $0[0], $1 = $0[1], b = $1[0], c = $1[1];
       }
     ).andAssert(
       function() {
@@ -357,16 +377,15 @@ describe('Destructuring Array', function() {
       }
     );
   });
-  it('should destruct nested arrays with repeated values', function() {
+  it.skip('should destruct nested arrays with repeated values', function() {
     assertSrcEquals(
       function() {
         [a, [a, b]] = [1, [2, 3]];
       },
-      // TODO: ideally it would be only "a = 2, b = 3" right?
-      // This is a very edge case so I'm not sure it's worth the time
+      // ideally a = 2, b = 3
       function() {
         var $0, $1;
-        $0 = [1, [2, 3]], a = 1, $1 = $0[1], a = $1[0], b = $1[1];
+        $0 = [1, [2, 3]], a = $0[0], $1 = $0[1], a = $1[0], b = $1[1], $0;
       }
     ).andAssert(
       function() {
@@ -377,10 +396,9 @@ describe('Destructuring Array', function() {
   it('should destruct nested arrays with repeated values with var', function() {
     assertSrcEquals(
       'var [a, [a, b]] = [1, [2, 3]];',
-      // TODO: ideally it would be only "var a = 2, b = 3" right?
-      // This is a very edge case so I'm not sure it's worth the time
+      // ideally var a = 2, b = 3
       function() {
-        var $0 = [1, [2, 3]], a = 1, $1 = $0[1], a = $1[0], b = $1[1];
+        var $0 = [1, [2, 3]], a = $0[0], $1 = $0[1], a = $1[0], b = $1[1];
       }
     ).andAssert(
       function() {
@@ -427,7 +445,7 @@ describe('Destructuring Array', function() {
       },
       function() {
         var c = function () { return [, 1]; }, $0;
-        $0 = c(), a = $0[0], b = $0[1];
+        $0 = c(), a = $0[0], b = $0[1], $0;
       }
     ).andAssert(
       function() {
@@ -458,7 +476,7 @@ describe('Destructuring Array', function() {
       },
       function() {
         var d = function () { return [, 1]; }, $0;
-        $0 = d(), a = $0[0], b = $0[1], c = $0[3];
+        $0 = d(), a = $0[0], b = $0[1], c = $0[3], $0;
       }
     ).andAssert(
       function() {
@@ -473,9 +491,12 @@ describe('Destructuring Array', function() {
         var d = function () { return [, 1]; };
         [[a, b], c] = [d(), 3];
       },
+      // ideally
+      // var d = function () { return [, 1]; }, $0, $1;
+      // $0 = [d(), 3], $1 = $0[0], a = $1[0], b = $1[1], c = 3;
       function() {
         var d = function () { return [, 1]; }, $0, $1;
-        $0 = [d(), 3], $1 = $0[0], a = $1[0], b = $1[1], c = 3;
+        $0 = [d(), 3], $1 = $0[0], a = $1[0], b = $1[1], $1, c = $0[1], $0;
       }
     ).andAssert(
       function() {
@@ -488,9 +509,12 @@ describe('Destructuring Array', function() {
     assertSrcEquals(
       'var d = function () { return [, 1]; };' +
       'var [[a, b], c] = [d(), 3];',
+      // ideally
+      // var d = function () { return [, 1]; };
+      // var $0 = [d(), 3], $1 = $0[0], a = $1[0], b = $1[1], c = 3;
       function() {
         var d = function () { return [, 1]; };
-        var $0 = [d(), 3], $1 = $0[0], a = $1[0], b = $1[1], c = 3;
+        var $0 = [d(), 3], $1 = $0[0], a = $1[0], b = $1[1], c = $0[1];
       }
     ).andAssert(
       function() {
@@ -504,9 +528,12 @@ describe('Destructuring Array', function() {
         var d = [1, 2];
         [[a, b], c] = [d, 3];
       },
+      // ideally
+      // var d = [1, 2], $0, $1;
+      // $0 = [d, 3], $1 = $0[0], a = $1[0], b = $1[1], c = 3;
       function() {
         var d = [1, 2], $0, $1;
-        $0 = [d, 3], $1 = $0[0], a = $1[0], b = $1[1], c = 3;
+        $0 = [d, 3], $1 = $0[0], a = $1[0], b = $1[1], $1, c = $0[1], $0;
       }
     ).andAssert(
       function() {
@@ -519,9 +546,12 @@ describe('Destructuring Array', function() {
     assertSrcEquals(
       'var d = [1, 2];' +
       'var [[a, b], c] = [d, 3];',
+      // ideally
+      // var d = [1, 2];
+      // var $0 = [d, 3], $1 = $0[0], a = $1[0], b = $1[1], c = 3;
       function() {
         var d = [1, 2];
-        var $0 = [d, 3], $1 = $0[0], a = $1[0], b = $1[1], c = 3;
+        var $0 = [d, 3], $1 = $0[0], a = $1[0], b = $1[1], c = $0[1];
       }
     ).andAssert(
       function() {
@@ -537,7 +567,7 @@ describe('Destructuring Array', function() {
       },
       function() {
         var $0;
-        $0 = 1, a = $0[0], b = $0[1];
+        $0 = 1, a = $0[0], b = $0[1], $0;
       }
     ).andAssert(
       function() {
@@ -557,7 +587,7 @@ describe('Destructuring Array', function() {
       // c becomes 33 (Firefox 29.0a2 (2014-03-09))
       function() {
         var $0;
-        $0 = 'fa', a = $0[0], b = $0[1], c = $0[2];
+        $0 = 'fa', a = $0[0], b = $0[1], c = $0[2], $0;
       }
     ).andAssert(
       function() {
@@ -607,7 +637,7 @@ describe('Destructuring Array', function() {
       },
       function() {
         var c = function () { return 1; }, $0;
-        $0 = c(), a = $0[0], b = $0[1];
+        $0 = c(), a = $0[0], b = $0[1], $0;
       }
     ).andAssert(
       function() {
@@ -640,7 +670,7 @@ describe('Destructuring Array', function() {
       },
       function() {
         var c = function () { return null; }, $0;
-        $0 = c(), a = $0[0], b = $0[1];
+        $0 = c(), a = $0[0], b = $0[1], $0;
       }
     ).checkThrows(
       TypeError,
@@ -662,7 +692,7 @@ describe('Destructuring Array', function() {
       'TypeError: Cannot read property \'0\' of null'
     );
   });
-  it('should destruct complex nested sequence expression', function() {
+  it.skip('should destruct complex nested sequence expression', function() {
     assertSrcEquals(
       function() {
         var f = [1, 2], h = [8];
@@ -673,7 +703,7 @@ describe('Destructuring Array', function() {
         var f = [1, 2], h = [8];
         var i = function () { return; }, $0, $1, $2;
         $0 = [f, i(), [, 5]], $1 = $0[0], a = $1[0], b = $1[1],
-          c = $0[1], $2 = $0[2], d = $2[0], e = $2[1], g = h[0];
+          c = $0[1], $2 = $0[2], d = $2[0], e = $2[1], $2, $0, g = h[0];
       }
     ).andAssert(
       function() {
@@ -711,8 +741,8 @@ describe('Destructuring Array', function() {
         var f = function () { return [1, 2]; };
         function garbage() { }
         var $0, $1;
-        $0 = f(), a = $0[0], b = $0[1];
-        $1 = f(), c = $1[0], d = $1[1];
+        $0 = f(), a = $0[0], b = $0[1], $0;
+        $1 = f(), c = $1[0], d = $1[1], $1;
       }
     ).andAssert(
       function() {
@@ -761,7 +791,7 @@ describe('Destructuring Array', function() {
       }
     );
   });
-  it('should destruct function arguments nested', function() {
+  it.skip('should destruct function arguments nested', function() {
     assertSrcEquals(
       getComment(function() {/*
         var [a, b] = function ([c, [d, e]]) {
@@ -788,7 +818,7 @@ describe('Destructuring Array', function() {
       },
       function() {
         var x = [[1, 2], [3, 4]], i = 2, a, b, $0;
-        while (i && ($0 = x[--i], a = $0[0], b = $0[1])) { }
+        while (i && ($0 = x[--i], a = $0[0], b = $0[1], $0)) { }
       }
     ).andAssert(
       function() {
@@ -796,18 +826,59 @@ describe('Destructuring Array', function() {
       }
     );
   });
-  it.skip('should destruct and the resulting expression should return ' +
-          'should return the initial right value', function() {
+  it('should destruct and the resulting expression should return ' +
+     'the initial right value', function() {
     assertSrcEquals(
       function() {
-        var c = ([a, b] = [1, 2]);
+        function f() { return [1, 2]; } ;
+        c = [a, b] = f(), 3;
       },
       function() {
-        var c = ([a, b] = [1, 2]);
+        function f() { return [1, 2]; } ;
+        var $0;
+        c = ($0 = f(), a = $0[0], b = $0[1], $0), 3;
       }
     ).andAssert(
       function() {
         a === 1 && b === 2 && c[0] === 1 && c[1] === 2;
+      }
+    );
+  });
+  it('should destruct and the resulting expression should return ' +
+     'initial right value without last value', function() {
+    assertSrcEquals(
+      function() {
+        [c, d] = [a, b] = [1, 2];
+      },
+      function() {
+        var $0, $1;
+        $1 = ($0 = [1, 2], a = $0[0], b = $0[1], $0),
+          c = $1[0], d = $1[1], $1;
+      }
+    ).andAssert(
+      function() {
+        a === 1 && b === 2 && c === 1 && d === 2;
+      }
+    );
+  });
+  it('should destruct and the resulting expression should return ' +
+     'the initial right value on a return', function() {
+    assertSrcEquals(
+      function() {
+        var c = function f() {
+          var a, b;
+          return [a, b] = [1, 2], 3;
+        }();
+      },
+      function() {
+        var c = function f() {
+          var a, b, $0;
+          return $0 = [1, 2], a = $0[0], b = $0[1], $0, 3;
+        }();
+      }
+    ).andAssert(
+      function() {
+        c === 3;
       }
     );
   });
