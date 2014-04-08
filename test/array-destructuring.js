@@ -702,15 +702,15 @@ describe('Destructuring Array', function() {
         [[a, b], c, [d, e]] = [f, i(), [, 5]], [g] = h;
       },
       // ideally
-      // var f = [1, 2], h = [8];
-      // var i = function () { return; }, $0, $1, $2;
+      // var f = [1, 2], h = [8], $0, $1, $2;
+      // var i = function () { return; };
       // $0 = [f, i(), [, 5]], $1 = $0[0], a = $1[0], b = $1[1],
       //   c = $0[1], $2 = $0[2], d = $2[0], e = $2[1], g = h[0];
       function() {
-        var f = [1, 2], h = [8];
-        var i = function () { return; }, $0, $1, $2;
-        $0 = [f, i(), [, 5]], $1 = $0[0], a = $1[0], b = $1[1],
-          $1, c = $0[1], $2 = $0[2], d = $2[0], e = $2[1], $2, $0, g = h[0], h;
+        var f = [1, 2], h = [8], $0, $1, $2;
+        var i = function () { return; };
+        $0 = [f, i(), [, 5]], $1 = $0[0], a = $1[0], b = $1[1], $1,
+          c = $0[1], $2 = $0[2], d = $2[0], e = $2[1], $2, $0, g = h[0], h;
       }
     ).andAssert(
       function() {
@@ -745,9 +745,8 @@ describe('Destructuring Array', function() {
         [c, d] = f();
       },
       function() {
-        var f = function () { return [1, 2]; };
+        var f = function () { return [1, 2]; }, $0, $1;
         function garbage() { }
-        var $0, $1;
         $0 = f(), a = $0[0], b = $0[1], $0;
         $1 = f(), c = $1[0], d = $1[1], $1;
       }
@@ -862,8 +861,8 @@ describe('Destructuring Array', function() {
         c = [a, b] = f(), 3;
       },
       function() {
-        function f() { return [1, 2]; } ;
         var $0;
+        function f() { return [1, 2]; } ;
         c = ($0 = f(), a = $0[0], b = $0[1], $0), 3;
       }
     ).andAssert(

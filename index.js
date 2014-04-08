@@ -30,28 +30,15 @@ function createTemporaryVariableDeclaration(node, id, value) {
     // it's used on `this.replace` as the initial index that will be replaced.
     this.name++;
   } else {
-    var path = this;
-    while ((path = path.parentPath)) {
-      if (typeof path.name === 'number') {
-        var parent = path.parentPath;
-        if (parent.name === 'body') {
-          var previousNode = parent.value[path.name-1];
-          tempVar = b.variableDeclarator(temporaryVariableId, null);
-          if (n.VariableDeclaration.check(previousNode)) {
-            previousNode.declarations.push(tempVar);
-          } else {
-            var tempVarDeclaration = b.variableDeclaration('var', [tempVar]);
-            parent.value.splice(path.name, 0, tempVarDeclaration);
-            // since we added one more element, we have to update this
-            // element's index (name) on the parent's array
-            path.name++;
-          }
-          break;
-        }
-      }
-    }
-    if (!path) {
-      throw new Error('No block body could be found as parent of this node.');
+    // Get the BlockStatement body in case there is one. This could be safer.
+    var body = this.scope.node.body.body || this.scope.node.body;
+    var firstNode = body[0];
+    tempVar = b.variableDeclarator(temporaryVariableId, null);
+    if (n.VariableDeclaration.check(firstNode)) {
+      firstNode.declarations.push(tempVar);
+    } else {
+      var tempVarDeclaration = b.variableDeclaration('var', [tempVar]);
+      body.unshift(tempVarDeclaration);
     }
     node.unshiftDeclaration(temporaryVariableId, value);
   }
