@@ -778,6 +778,28 @@ describe('Destructuring Array', function() {
       }
     );
   });
+  it('should destruct with a yield',
+     function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        var c = function* (b) {
+          var [a, b] = yield b;
+          return [a, b];
+        }([1, 2]), d = c.next();
+      */}),
+      function() {
+        var c = function* (b) {
+          var $0 = yield b, a = $0[0], b = $0[1];
+          return [a, b];
+        }([1, 2]), d = c.next();
+      }
+    ).andAssert(
+      // you'll need node devel for this
+      function() {
+        d.value[0] === 1 && d.value[1] === 2;
+      }
+    );
+  });
   it('should destruct function arguments', function() {
     assertSrcEquals(
       getComment(function() {/*
@@ -798,7 +820,7 @@ describe('Destructuring Array', function() {
       }
     );
   });
-  it.skip('should destruct function arguments nested', function() {
+  it('should destruct function arguments nested', function() {
     assertSrcEquals(
       getComment(function() {/*
         var [a, b] = function ([c, [d, e]]) {

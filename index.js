@@ -125,6 +125,8 @@ function rewriteAssigmentNode(getId) {
           }
           node.right = replacementExpression;
 
+        // [a, b] = yield c;
+        case Syntax.YieldExpression:
         // [a, b] = [b, a];
         case Syntax.ArrayExpression:
         // [a, b] = c[0];
@@ -183,7 +185,7 @@ function traverse(getId) {
     n.FunctionDeclaration.check(node) ||
     n.FunctionExpression.check(node)
   ) {
-    rewriteFunctionNode.call(this, node, getId);
+    rewriteFunctionNode.call(this, getId);
   }
 }
 
@@ -229,7 +231,8 @@ function rightSideObjectExpression(node, getId) {
   }
 }
 
-function rewriteFunctionNode(node, getId) {
+function rewriteFunctionNode(getId) {
+  var node = this.node;
   var params = node.params;
   for (var i = 0; i < params.length; i++) {
     var param = params[i];
@@ -267,7 +270,7 @@ function rewriteFunctionNode(node, getId) {
     types.traverse(
       node.body.body[0],
       function(node) {
-        traverse.call(this, node, getId);
+        traverse.call(this, getId);
       }
     );
   }
