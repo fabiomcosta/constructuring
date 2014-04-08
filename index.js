@@ -79,6 +79,11 @@ function addTransferDeclarations(node, rightIdentifier) {
 
 function rightSideIdentifier(node) {
   addTransferDeclarations(node, node.right);
+  // Variable declarations always evaluate to undefined so we don't need
+  // to make it return the 'init' (right) value.
+  if (!n.VariableDeclarator.check(this.node)) {
+    node.pushDeclaration(node.right, null);
+  }
 }
 
 function rightSideCache(node, getId) {

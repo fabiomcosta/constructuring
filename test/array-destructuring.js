@@ -416,7 +416,7 @@ describe('Destructuring Array', function() {
       },
       function() {
         var c = [1, 2];
-        a = c[0], b = c[1];
+        a = c[0], b = c[1], c;
       }
     ).andAssert(
       function() {
@@ -710,7 +710,7 @@ describe('Destructuring Array', function() {
         var f = [1, 2], h = [8];
         var i = function () { return; }, $0, $1, $2;
         $0 = [f, i(), [, 5]], $1 = $0[0], a = $1[0], b = $1[1],
-          $1, c = $0[1], $2 = $0[2], d = $2[0], e = $2[1], $2, $0, g = h[0];
+          $1, c = $0[1], $2 = $0[2], d = $2[0], e = $2[1], $2, $0, g = h[0], h;
       }
     ).andAssert(
       function() {
@@ -778,8 +778,7 @@ describe('Destructuring Array', function() {
       }
     );
   });
-  it('should destruct with a yield',
-     function() {
+  it('should destruct with a yield', function() {
     assertSrcEquals(
       getComment(function() {/*
         var c = function* (b) {
@@ -866,6 +865,23 @@ describe('Destructuring Array', function() {
         function f() { return [1, 2]; } ;
         var $0;
         c = ($0 = f(), a = $0[0], b = $0[1], $0), 3;
+      }
+    ).andAssert(
+      function() {
+        a === 1 && b === 2 && c[0] === 1 && c[1] === 2;
+      }
+    );
+  });
+  it('should destruct and the resulting expression should return ' +
+     'the initial right value without temp var', function() {
+    assertSrcEquals(
+      function() {
+        var d = [1, 2];
+        c = [a, b] = d, 3;
+      },
+      function() {
+        var d = [1, 2];
+        c = (a = d[0], b = d[1], d), 3;
       }
     ).andAssert(
       function() {
