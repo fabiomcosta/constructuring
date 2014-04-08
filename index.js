@@ -99,11 +99,11 @@ function rightSideCache(node, getId) {
 function rewriteAssigmentNode(getId) {
   var node = new DeclarationWrapper(this);
 
-  if (node.left) {
-    if (!node.right) {
-      return;
-    }
+  if (!node.left || !node.right) {
+    return;
+  }
 
+  if (n.ArrayPattern.check(node.left) || n.ObjectPattern.check(node.left)) {
     if (n.ArrayPattern.check(node.left)) {
       switch (node.right.type) {
         // [c, d] = [a, b] = [1, 2];
@@ -156,23 +156,20 @@ function rewriteAssigmentNode(getId) {
 
     }
 
-    if (n.ArrayPattern.check(node.left) || n.ObjectPattern.check(node.left)) {
-      // Recursively transforms other assignments.
-      // For nested ArrayPatterns for example.
-      var newNodes = node.getNodes();
-      var replacementNodes = this.replace.apply(this, newNodes);
-      replacementNodes.forEach(function(replacementNode) {
-        types.traverse(
-          replacementNode,
-          function() {
-            traverse.call(this, getId);
-          }
-        );
-      });
-      return newNodes;
-    }
+    // Recursively transforms other assignments.
+    // For nested ArrayPatterns for example.
+    var newNodes = node.getNodes();
+    var replacementNodes = this.replace.apply(this, newNodes);
+    replacementNodes.forEach(function(replacementNode) {
+      types.traverse(
+        replacementNode,
+        function() {
+          traverse.call(this, getId);
+        }
+      );
+    });
+    return newNodes;
   }
-
 }
 
 function traverse(getId) {

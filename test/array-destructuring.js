@@ -312,16 +312,18 @@ describe('Destructuring Array', function() {
       }
     );
   });
-  it.skip('should destruct when there are identifiers on the right array, ' +
+  it('should destruct when there are identifiers on the right array, ' +
      'swapping more than one value on a nested array', function() {
     assertSrcEquals(
       function() {
         var a = 1, b = 2, c = 3;
         [a, [b, c]] = [c, [a, b]];
       },
+      // ideally
+      // $0 = [c, [a, b]], a = $0[0], $1 = $0[1], b = $1[0], c = $1[1], $0;
       function() {
         var a = 1, b = 2, c = 3, $0, $1;
-        $0 = [c, [a, b]], a = $0[0], $1 = $0[1], b = $1[0], c = $1[1], $0;
+        $0 = [c, [a, b]], a = $0[0], $1 = $0[1], b = $1[0], c = $1[1], $1, $0;
       }
     ).andAssert(
       function() {
@@ -346,7 +348,7 @@ describe('Destructuring Array', function() {
       }
     );
   });
-  it.skip('should destruct nested arrays', function() {
+  it('should destruct nested arrays', function() {
     assertSrcEquals(
       function() {
         [a, [b, c]] = [1, [2, 3]];
@@ -356,7 +358,7 @@ describe('Destructuring Array', function() {
       // $0 = [1, [2, 3]], a = 1, $1 = $0[1], b = $1[0], c = $1[1];
       function() {
         var $0, $1;
-        $0 = [1, [2, 3]], a = $0[0], $1 = $0[1], b = $1[0], c = $1[1], $0;
+        $0 = [1, [2, 3]], a = $0[0], $1 = $0[1], b = $1[0], c = $1[1], $1, $0;
       }
     ).andAssert(
       function() {
@@ -377,7 +379,7 @@ describe('Destructuring Array', function() {
       }
     );
   });
-  it.skip('should destruct nested arrays with repeated values', function() {
+  it('should destruct nested arrays with repeated values', function() {
     assertSrcEquals(
       function() {
         [a, [a, b]] = [1, [2, 3]];
@@ -385,7 +387,7 @@ describe('Destructuring Array', function() {
       // ideally a = 2, b = 3
       function() {
         var $0, $1;
-        $0 = [1, [2, 3]], a = $0[0], $1 = $0[1], a = $1[0], b = $1[1], $0;
+        $0 = [1, [2, 3]], a = $0[0], $1 = $0[1], a = $1[0], b = $1[1], $1, $0;
       }
     ).andAssert(
       function() {
@@ -692,18 +694,23 @@ describe('Destructuring Array', function() {
       'TypeError: Cannot read property \'0\' of null'
     );
   });
-  it.skip('should destruct complex nested sequence expression', function() {
+  it('should destruct complex nested sequence expression', function() {
     assertSrcEquals(
       function() {
         var f = [1, 2], h = [8];
         var i = function () { return; };
         [[a, b], c, [d, e]] = [f, i(), [, 5]], [g] = h;
       },
+      // ideally
+      // var f = [1, 2], h = [8];
+      // var i = function () { return; }, $0, $1, $2;
+      // $0 = [f, i(), [, 5]], $1 = $0[0], a = $1[0], b = $1[1],
+      //   c = $0[1], $2 = $0[2], d = $2[0], e = $2[1], g = h[0];
       function() {
         var f = [1, 2], h = [8];
         var i = function () { return; }, $0, $1, $2;
         $0 = [f, i(), [, 5]], $1 = $0[0], a = $1[0], b = $1[1],
-          c = $0[1], $2 = $0[2], d = $2[0], e = $2[1], $2, $0, g = h[0];
+          $1, c = $0[1], $2 = $0[2], d = $2[0], e = $2[1], $2, $0, g = h[0];
       }
     ).andAssert(
       function() {
