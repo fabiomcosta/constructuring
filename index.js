@@ -86,96 +86,33 @@ function rightSideAssignmentExpression(getId) {
   return replacementExpression;
 }
 
-function rewriteAssigmentNode(getId) {
-  var node = new DeclarationWrapper(this);
+function rewriteArrayPattern(node, getId) {
+  switch (node.right.type) {
+    // [c, d] = [a, b] = [1, 2];
+    case Syntax.AssignmentExpression:
+      node.right = rightSideAssignmentExpression.call(this, getId);
 
-  if (!node.left || !node.right) {
-    return;
+    // [a, b] = yield c;
+    case Syntax.YieldExpression:
+    // [a, b] = [b, a];
+    case Syntax.ArrayExpression:
+    // [a, b] = c[0];
+    // [a, b] = c.prop;
+    case Syntax.MemberExpression:
+    // [a, b] = c();
+    case Syntax.CallExpression:
+    // [a, b] = 1;
+    case Syntax.Literal:
+    // [a, b] = (a = 4);
+    case Syntax.SequenceExpression:
+      rightSideCache.call(this, node, getId);
+      break;
+
+    // [a, b] = c;
+    case Syntax.Identifier:
+      rightSideIdentifier.call(this, node, node.right);
+      break;
   }
-
-  if (n.ArrayPattern.check(node.left) || n.ObjectPattern.check(node.left)) {
-    if (n.ArrayPattern.check(node.left)) {
-      switch (node.right.type) {
-        // [c, d] = [a, b] = [1, 2];
-        case Syntax.AssignmentExpression:
-          node.right = rightSideAssignmentExpression.call(this, getId);
-
-        // [a, b] = yield c;
-        case Syntax.YieldExpression:
-        // [a, b] = [b, a];
-        case Syntax.ArrayExpression:
-        // [a, b] = c[0];
-        // [a, b] = c.prop;
-        case Syntax.MemberExpression:
-        // [a, b] = c();
-        case Syntax.CallExpression:
-        // [a, b] = 1;
-        case Syntax.Literal:
-        // [a, b] = (a = 4);
-        case Syntax.SequenceExpression:
-          rightSideCache.call(this, node, getId);
-          break;
-
-        // [a, b] = c;
-        case Syntax.Identifier:
-          rightSideIdentifier.call(this, node, node.right);
-          break;
-      }
-
-    } else if (n.ObjectPattern.check(node.left)) {
-
-      switch (node.right.type) {
-        // Right is an object. Ex: ({a}) = {a: 1};
-        case Syntax.ObjectExpression:
-          rightSideObjectExpression.call(this, node, getId);
-          break;
-      }
-
-    }
-
-    // Recursively transforms other assignments.
-    // For nested ArrayPatterns for example.
-    var newNodes = node.getNodes();
-    var replacementNodes = this.replace.apply(this, newNodes);
-    replacementNodes.forEach(function(replacementNode) {
-      types.traverse(
-        replacementNode,
-        function() {
-          traverse.call(this, getId);
-        }
-      );
-    });
-    return newNodes;
-  }
-}
-
-function traverse(getId) {
-  var node = this.node;
-  if (
-    n.VariableDeclarator.check(node) ||
-    n.AssignmentExpression.check(node)
-  ) {
-    rewriteAssigmentNode.call(this, getId);
-  } else if (
-    n.FunctionDeclaration.check(node) ||
-    n.FunctionExpression.check(node)
-  ) {
-    rewriteFunctionNode.call(this, getId);
-  }
-}
-
-function transform(ast, options) {
-  options = options || {};
-  var getId = getIdCreator(options.idPrefix);
-  var result = types.traverse(ast, function() {
-    traverse.call(this, getId);
-  });
-  return result;
-}
-
-function transformSource(source, transformOptions, codegenOptions) {
-  var ast = esprima.parse(source);
-  return escodegen.generate(transform(ast, transformOptions), codegenOptions);
 }
 
 function ObjectLookupPropertyWithKey(objectExpression, key) {
@@ -198,6 +135,15 @@ function rightSideObjectExpression(node, getId) {
       leftProperty.key
     );
     node.pushDeclaration(leftProperty.key, rightProperty.value);
+  }
+}
+
+function rewriteObjectPattern(node, getId) {
+  switch (node.right.type) {
+    // Right is an object. Ex: ({a}) = {a: 1};
+    case Syntax.ObjectExpression:
+      rightSideObjectExpression.call(this, node, getId);
+      break;
   }
 }
 
@@ -247,8 +193,66 @@ function rewriteFunctionNode(getId) {
   }
 }
 
+function rewriteAssigmentNode(getId) {
+  var node = new DeclarationWrapper(this);
+
+  if (!node.left || !node.right) {
+    return;
+  }
+
+  if (n.ArrayPattern.check(node.left) || n.ObjectPattern.check(node.left)) {
+    if (n.ArrayPattern.check(node.left)) {
+      rewriteArrayPattern.call(this, node, getId);
+    } else if (n.ObjectPattern.check(node.left)) {
+      rewriteObjectPattern.call(this, node, getId);
+    }
+
+    // Recursively transforms other assignments.
+    // For nested ArrayPatterns for example.
+    var newNodes = node.getNodes();
+    var replacementNodes = this.replace.apply(this, newNodes);
+    replacementNodes.forEach(function(replacementNode) {
+      types.traverse(
+        replacementNode,
+        function() {
+          traverse.call(this, getId);
+        }
+      );
+    });
+    return newNodes;
+  }
+}
+
+function traverse(getId) {
+  var node = this.node;
+  if (
+    n.VariableDeclarator.check(node) ||
+    n.AssignmentExpression.check(node)
+  ) {
+    rewriteAssigmentNode.call(this, getId);
+  } else if (
+    n.FunctionDeclaration.check(node) ||
+    n.FunctionExpression.check(node)
+  ) {
+    rewriteFunctionNode.call(this, getId);
+  }
+}
+
+function transform(ast, options) {
+  options = options || {};
+  var getId = getIdCreator(options.idPrefix);
+  var result = types.traverse(ast, function() {
+    traverse.call(this, getId);
+  });
+  return result;
+}
+
+function transformSource(source, transformOptions, codegenOptions) {
+  var ast = esprima.parse(source);
+  return escodegen.generate(transform(ast, transformOptions), codegenOptions);
+}
+
 module.exports = {
   transform: transform,
   transformSource: transformSource
 };
-
