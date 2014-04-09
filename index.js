@@ -16,32 +16,20 @@ var p = utils.p, log = utils.log;
 
 
 function createTemporaryVariableDeclaration(node, id, value) {
-  var tempVar;
   var temporaryVariableId = b.identifier(id);
-  if (n.VariableDeclarator.check(this.node)) {
-    tempVar = b.variableDeclarator(
-      temporaryVariableId,
-      value
-    );
-    this.replace(tempVar, this.node);
-    // WARN: this can be dangerous and depends on internals from ast-types to
-    // work.
-    // `this.name` is the position of this node on its parent's children array,
-    // it's used on `this.replace` as the initial index that will be replaced.
-    this.name++;
-  } else {
+  if (!n.VariableDeclarator.check(this.node)) {
     // Get the BlockStatement body in case there is one. This could be safer.
     var body = this.scope.node.body.body || this.scope.node.body;
     var firstNode = body[0];
-    tempVar = b.variableDeclarator(temporaryVariableId, null);
+    var tempVar = b.variableDeclarator(temporaryVariableId, null);
     if (n.VariableDeclaration.check(firstNode)) {
       firstNode.declarations.push(tempVar);
     } else {
       var tempVarDeclaration = b.variableDeclaration('var', [tempVar]);
       body.unshift(tempVarDeclaration);
     }
-    node.unshiftDeclaration(temporaryVariableId, value);
   }
+  node.unshiftDeclaration(temporaryVariableId, value);
   return temporaryVariableId;
 }
 
@@ -234,14 +222,15 @@ function rewriteFunctionNode(getId) {
 
       // NOTE: is the first element from a function body always the block
       // statement or do we have to look for the first one?
-      var firstNode = node.body.body[0];
+      var body = node.body.body || node.body;
+      var firstNode = body[0];
       var declarations;
 
       if (n.VariableDeclaration.check(firstNode)) {
         declarations = firstNode.declarations;
       } else {
         var variableDeclaration = b.variableDeclaration('var', []);
-        node.body.body.unshift(variableDeclaration);
+        body.unshift(variableDeclaration);
         declarations = variableDeclaration.declarations;
       }
 
@@ -260,7 +249,7 @@ function rewriteFunctionNode(getId) {
     }
 
     types.traverse(
-      node.body.body[0],
+      (node.body.body || node.body)[0],
       function(node) {
         traverse.call(this, getId);
       }
