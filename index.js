@@ -36,7 +36,7 @@ function createTemporaryVariableDeclaration(id, value, node) {
 // Adds declarations that transfer the values from an identifier on the
 // right to the ones on the left ArrayPattern.
 // Ex: [a, b] = c --> a = c[0], b = c[1]
-function addTransferDeclarations(node, rightIdentifier) {
+function rightSideIdentifier(node, rightIdentifier) {
   var leftElements = node.left.elements;
   for (var i = 0; i < leftElements.length; i++) {
     var leftElement = leftElements[i];
@@ -50,14 +50,10 @@ function addTransferDeclarations(node, rightIdentifier) {
     );
     node.pushDeclaration(leftElement, rightElement);
   }
-}
-
-function rightSideIdentifier(node, right) {
-  addTransferDeclarations(node, right);
   // Variable declarations always evaluate to undefined so we don't need
   // to make it return the 'init' (right) value.
   if (!n.VariableDeclarator.check(this.node)) {
-    node.pushDeclaration(right, null);
+    node.pushDeclaration(rightIdentifier, null);
   }
 }
 
