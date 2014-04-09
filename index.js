@@ -15,7 +15,7 @@ var utils = require('./lib/utils');
 var p = utils.p, log = utils.log;
 
 
-function createTemporaryVariableDeclaration(node, id, value) {
+function createTemporaryVariableDeclaration(id, value, node) {
   var temporaryVariableId = b.identifier(id);
   if (!n.VariableDeclarator.check(this.node)) {
     // Get the BlockStatement body in case there is one.
@@ -64,9 +64,9 @@ function rightSideIdentifier(node, right) {
 function rightSideCache(node, getId) {
   var cacheVariable = createTemporaryVariableDeclaration.call(
     this,
-    node,
     getId(),
-    node.right
+    node.right,
+    node
   );
   rightSideIdentifier.call(this, node, cacheVariable);
 }
