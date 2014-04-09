@@ -18,15 +18,15 @@ var p = utils.p, log = utils.log;
 function createTemporaryVariableDeclaration(node, id, value) {
   var temporaryVariableId = b.identifier(id);
   if (!n.VariableDeclarator.check(this.node)) {
-    // Get the BlockStatement body in case there is one. This could be safer.
+    // Get the BlockStatement body in case there is one.
+    // TODO This could be safer, maybe checking if 'body' is an array?
     var body = this.scope.node.body.body || this.scope.node.body;
     var firstNode = body[0];
     var tempVar = b.variableDeclarator(temporaryVariableId, null);
     if (n.VariableDeclaration.check(firstNode)) {
       firstNode.declarations.push(tempVar);
     } else {
-      var tempVarDeclaration = b.variableDeclaration('var', [tempVar]);
-      body.unshift(tempVarDeclaration);
+      body.unshift(b.variableDeclaration('var', [tempVar]));
     }
   }
   node.unshiftDeclaration(temporaryVariableId, value);
@@ -52,12 +52,12 @@ function addTransferDeclarations(node, rightIdentifier) {
   }
 }
 
-function rightSideIdentifier(node) {
-  addTransferDeclarations(node, node.right);
+function rightSideIdentifier(node, right) {
+  addTransferDeclarations(node, right);
   // Variable declarations always evaluate to undefined so we don't need
   // to make it return the 'init' (right) value.
   if (!n.VariableDeclarator.check(this.node)) {
-    node.pushDeclaration(node.right, null);
+    node.pushDeclaration(right, null);
   }
 }
 
@@ -68,12 +68,7 @@ function rightSideCache(node, getId) {
     getId(),
     node.right
   );
-  addTransferDeclarations(node, cacheVariable);
-  // Variable declarations always evaluate to undefined so we don't need
-  // to make it return the 'init' (right) value.
-  if (!n.VariableDeclarator.check(this.node)) {
-    node.pushDeclaration(cacheVariable, null);
-  }
+  rightSideIdentifier.call(this, node, cacheVariable);
 }
 
 function rewriteAssigmentNode(getId) {
@@ -123,7 +118,7 @@ function rewriteAssigmentNode(getId) {
 
         // [a, b] = c;
         case Syntax.Identifier:
-          rightSideIdentifier.call(this, node);
+          rightSideIdentifier.call(this, node, node.right);
           break;
       }
 
