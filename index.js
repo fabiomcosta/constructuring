@@ -71,6 +71,25 @@ function rightSideCache(node, getId) {
   rightSideIdentifier.call(this, node, cacheVariable);
 }
 
+function rightSideAssignmentExpression(getId) {
+  // TODO this can be 'init' sometimes
+  var replacementExpressions =
+    rewriteAssigmentNode.call(this.get('right'), getId);
+  if (replacementExpressions.length !== 1) {
+    throw new Error(
+      'Why is the replacemenent array bigger than one?'
+    );
+  }
+  var replacementExpression = replacementExpressions[0];
+  if (!n.SequenceExpression.check(replacementExpression)) {
+    throw new Error(
+      'Something unexpected happened, why isn\'t this a ' +
+      'SequenceExpression?'
+    );
+  }
+  return replacementExpression;
+}
+
 function rewriteAssigmentNode(getId) {
   var node = new DeclarationWrapper(this);
 
@@ -83,22 +102,7 @@ function rewriteAssigmentNode(getId) {
       switch (node.right.type) {
         // [c, d] = [a, b] = [1, 2];
         case Syntax.AssignmentExpression:
-          // TODO this can be 'init' sometimes
-          var replacementExpressions =
-            rewriteAssigmentNode.call(this.get('right'), getId);
-          if (replacementExpressions.length !== 1) {
-            throw new Error(
-              'Why is the replacemenent array bigger than one?'
-            );
-          }
-          var replacementExpression = replacementExpressions[0];
-          if (!n.SequenceExpression.check(replacementExpression)) {
-            throw new Error(
-              'Something unexpected happened, why isn\'t this a ' +
-              'SequenceExpression?'
-            );
-          }
-          node.right = replacementExpression;
+          node.right = rightSideAssignmentExpression.call(this, getId);
 
         // [a, b] = yield c;
         case Syntax.YieldExpression:
@@ -178,11 +182,6 @@ function transformSource(source, transformOptions, codegenOptions) {
   return escodegen.generate(transform(ast, transformOptions), codegenOptions);
 }
 
-module.exports = {
-  transform: transform,
-  transformSource: transformSource
-};
-
 function ObjectLookupPropertyWithKey(objectExpression, key) {
   for (var i = 0; i < objectExpression.length; i++) {
     var property = objectExpression[i];
@@ -251,3 +250,9 @@ function rewriteFunctionNode(getId) {
     );
   }
 }
+
+module.exports = {
+  transform: transform,
+  transformSource: transformSource
+};
+
