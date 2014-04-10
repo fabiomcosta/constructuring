@@ -20,6 +20,8 @@ function sanitizeSource(src) {
   src = src.replace(/[\n\t ]+/g, ' ');
   src = src.replace(/\[\s+/g, '['); // remove space inside [. [ 1] -> [1]
   src = src.replace(/\s+\]/g, ']'); // remove space inside ]. [1 ] -> [1]
+  src = src.replace(/\{ +/g, '{'); // remove space inside }. { a: 1} -> {a: 1}
+  src = src.replace(/ +\}/g, '}'); // remove space inside }. {a: 1 } -> {a: 1}
   return src.trim();
 }
 

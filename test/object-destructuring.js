@@ -13,8 +13,9 @@ describe('Destructuring Object', function() {
       getComment(function() {/*
         ({a}) = {a: 1};
       */}),
+      // ideally a = 1;
       function() {
-        a = 1;
+        var $0; $0 = {a: 1}, a = $0.a, $0;
       }
     ).andAssert(
       function() {
@@ -28,8 +29,9 @@ describe('Destructuring Object', function() {
       getComment(function() {/*
         var {a} = {a: 1};
       */}),
+      // ideally var a = 1;
       function() {
-        var a = 1;
+        var $0 = {a: 1}, a = $0.a;
       }
     ).andAssert(
       function() {
@@ -43,12 +45,13 @@ describe('Destructuring Object', function() {
       getComment(function() {/*
         ({a, b}) = {a: 1, b: 2};
       */}),
+      // ideally a = 1, b = 2;
       function() {
-        a = 1, b = 2;
+        var $0; $0 = {a: 1, b: 2}, a = $0.a, b = $0.b, $0;
       }
     ).andAssert(
       function() {
-        a === 1;
+        a === 1 && b === 2;
       }
     );
   });
@@ -58,12 +61,31 @@ describe('Destructuring Object', function() {
       getComment(function() {/*
         var {a, b} = {a: 1, b: 2};
       */}),
+      // ideally var a = 1, b = 2;
       function() {
-        var a = 1, b = 2;
+        var $0 = {a: 1, b: 2}, a = $0.a, b = $0.b;
       }
     ).andAssert(
       function() {
-        a === 1;
+        a === 1 && b === 2;
+      }
+    );
+  });
+
+  it('should destruct and evaluate the expression to the right value',
+     function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        ({c, d}) = ({a, b}) = {a: 1, b: 2, c: 3, d: 4};
+      */}),
+      function() {
+        var $0, $1;
+        $1 = ($0 = {a: 1, b: 2, c: 3, d: 4}, a = $0.a, b = $0.b, $0),
+          c = $1.c, d = $1.d, $1;
+      }
+    ).andAssert(
+      function() {
+        a === 1 && b === 2 && c === 3 && d === 4;
       }
     );
   });
