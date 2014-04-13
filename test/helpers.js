@@ -22,6 +22,7 @@ function sanitizeSource(src) {
   src = src.replace(/\s+\]/g, ']'); // remove space inside ]. [1 ] -> [1]
   src = src.replace(/\{ +/g, '{'); // remove space inside }. { a: 1} -> {a: 1}
   src = src.replace(/ +\}/g, '}'); // remove space inside }. {a: 1 } -> {a: 1}
+  src = src.replace(/ +;/g, ';');
   return src.trim();
 }
 

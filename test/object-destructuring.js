@@ -108,7 +108,7 @@ describe('Destructuring Object', function() {
     );
   });
 
-  it.only('should destruct with a yield on the right',
+  it('should destruct with a yield on the right',
      function() {
     assertSrcEquals(
       getComment(function() {/*

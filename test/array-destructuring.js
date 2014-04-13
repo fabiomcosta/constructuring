@@ -945,6 +945,24 @@ describe('Destructuring Array', function() {
       }
     );
   });
+  it('should destruct new expression', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        function Constructor() {};
+        Constructor.prototype[0] = 3;
+        var [a] = new Constructor();
+      */}),
+      function() {
+        function Constructor() {};
+        Constructor.prototype[0] = 3;
+        var $0 = new Constructor(), a = $0[0];
+      }
+    ).andAssert(
+      function() {
+        a === 3;
+      }
+    );
+  });
   it.skip('should destruct on `for of` loops considering that a polyfill for ' +
      'Iterables is included', function() {
     assertSrcEquals(
