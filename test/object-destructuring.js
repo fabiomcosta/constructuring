@@ -90,4 +90,22 @@ describe('Destructuring Object', function() {
     );
   });
 
+  it('should destruct and evaluate the expression to the right value with var',
+     function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        var {b} = {a} = {a: 1, b: 2};
+      */}),
+      // ideally for readability
+      // var $0, $1 = ($0 = {a: 1, b: 2}, a = $0.a, $0), b = $1.b;
+      function() {
+        var $1 = ($0 = {a: 1, b: 2}, a = $0.a, $0), b = $1.b, $0;
+      }
+    ).andAssert(
+      function() {
+        a === 1 && b === 2 && c === 3 && d === 4;
+      }
+    );
+  });
+
 });

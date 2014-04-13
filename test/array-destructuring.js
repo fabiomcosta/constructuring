@@ -906,6 +906,25 @@ describe('Destructuring Array', function() {
     );
   });
   it('should destruct and the resulting expression should return ' +
+     'initial right value without last value with var', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        var [c, d] = [a, b] = [1, 2];
+      */}),
+      // ideally for readability
+      // var $0, $1 = ($0 = [1, 2], a = $0[0], b = $0[1], $0),
+      //   c = $1[0], d = $1[1];
+      function() {
+        var $1 = ($0 = [1, 2], a = $0[0], b = $0[1], $0),
+          c = $1[0], d = $1[1], $0;
+      }
+    ).andAssert(
+      function() {
+        a === 1 && b === 2 && c === 1 && d === 2;
+      }
+    );
+  });
+  it('should destruct and the resulting expression should return ' +
      'the initial right value on a return', function() {
     assertSrcEquals(
       function() {
