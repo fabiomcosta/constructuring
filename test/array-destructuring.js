@@ -945,7 +945,7 @@ describe('Destructuring Array', function() {
       }
     );
   });
-  it('should destruct new expression', function() {
+  it('should destruct NewExpression', function() {
     assertSrcEquals(
       getComment(function() {/*
         function Constructor() {};
@@ -962,6 +962,167 @@ describe('Destructuring Array', function() {
         a === 3;
       }
     );
+  });
+  it('should destruct BinaryExpression', function() {
+    Boolean.prototype[0] = 12;
+    assertSrcEquals(
+      getComment(function() {/*
+        var [a] = 3 === 3;
+      */}),
+      function() {
+        var $0 = 3 === 3, a = $0[0];
+      }
+    ).andAssert(
+      function() {
+        a === 12;
+      }
+    );
+    delete Boolean.prototype[0];
+  });
+  it('should destruct LogicalExpression', function() {
+    Boolean.prototype[0] = 9;
+    assertSrcEquals(
+      getComment(function() {/*
+        var [a] = true && false;
+      */}),
+      function() {
+        var $0 = true && false, a = $0[0];
+      }
+    ).andAssert(
+      function() {
+        a === 9;
+      }
+    );
+    delete Boolean.prototype[0];
+  });
+  it('should destruct ThisExpression', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        var b = function () {
+          var [a] = this;
+          return a;
+        }.call([1]);
+      */}),
+      function() {
+        var  b = function () {
+          var $0 = this, a = $0[0];
+          return a;
+        }.call([1]);
+      }
+    ).andAssert(
+      function() {
+        b === 1;
+      }
+    );
+  });
+  it('should destruct ConditionalExpression', function() {
+    Number.prototype[0] = 7;
+    assertSrcEquals(
+      getComment(function() {/*
+        var [a] = true ? 0 : 1;
+      */}),
+      function() {
+        var $0 = true ? 0 : 1, a = $0[0];
+      }
+    ).andAssert(
+      function() {
+        a === 7;
+      }
+    );
+    delete Number.prototype[0];
+  });
+  it('should destruct UpdateExpression', function() {
+    Number.prototype[0] = 7;
+    assertSrcEquals(
+      getComment(function() {/*
+        var b = 3, [a] = b++;
+      */}),
+      function() {
+        var b = 3, $0 = b++, a = $0[0];
+      }
+    ).andAssert(
+      function() {
+        a === 7;
+      }
+    );
+    delete Number.prototype[0];
+  });
+  it('should destruct UnaryExpression', function() {
+    Number.prototype[0] = 7;
+    assertSrcEquals(
+      getComment(function() {/*
+        var b = 3, [a] = -b;
+      */}),
+      function() {
+        var b = 3, $0 = -b, a = $0[0];
+      }
+    ).andAssert(
+      function() {
+        a === 7;
+      }
+    );
+    delete Number.prototype[0];
+  });
+  it('should destruct ArrowFunctionExpression', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        var [a] = () => 3;
+      */}),
+      getComment(function() {/*
+        var $0 = () => 3, a = $0[0];
+      */})
+    );
+    // We can't assert yet, Node doesn't support it
+  });
+  it('should destruct ComprehensionExpression', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        var [a] = [++x for (x of [1, 2])];
+      */}),
+      getComment(function() {/*
+        var $0 = [++x for (x of [1, 2])], a = $0[0];
+      */})
+    );
+    // We can't assert yet, Node doesn't support it
+  });
+  // escodegen doesn't support ClassExpression yet,
+  // but everything should already work
+  it.skip('should destruct ClassExpression', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        var [a] = class X{};
+      */}),
+      getComment(function() {/*
+        var $0 = class X{}, a = $0[0];
+      */})
+    );
+    // We can't assert yet, Node doesn't support it
+  });
+  // ast-types doesnt support TemplateLiteral yet
+  it.skip('should destruct TemplateLiteral', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        var [a] = `str`;
+      */}),
+      getComment(function() {/*
+        var $0 = `str`, a = $0[0];
+      */})
+    );
+    // We can't assert yet, Node doesn't support it
+  });
+  // ast-types doesnt support TaggedTemplateExpression yet
+  it.skip('should destruct TaggedTemplateExpression', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        function b(){};
+        var [a] = b`str`;
+      */}),
+      getComment(function() {/*
+        function b(){};
+        var $0 = b`str`, a = $0[0];
+      */})
+    );
+    // We can't assert yet, Node doesn't support it
   });
   it.skip('should destruct on `for of` loops considering that a polyfill for ' +
      'Iterables is included', function() {

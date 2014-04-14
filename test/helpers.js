@@ -17,22 +17,23 @@ var supportsDestructuring = (function() {
 }());
 
 function sanitizeSource(src) {
-  src = src.replace(/[\n\t ]+/g, ' ');
-  src = src.replace(/\[\s+/g, '['); // remove space inside [. [ 1] -> [1]
-  src = src.replace(/\s+\]/g, ']'); // remove space inside ]. [1 ] -> [1]
-  src = src.replace(/\{ +/g, '{'); // remove space inside }. { a: 1} -> {a: 1}
-  src = src.replace(/ +\}/g, '}'); // remove space inside }. {a: 1 } -> {a: 1}
-  src = src.replace(/ +;/g, ';');
-  return src.trim();
+  return src.replace(/[\n\t ]+/g, ' ')
+    .replace(/\[\s+/g, '[') // remove space inside [. [ 1] -> [1]
+    .replace(/\s+\]/g, ']') // remove space inside ]. [1 ] -> [1]
+    .replace(/\{ +/g, '{') // remove space inside }. { a: 1} -> {a: 1}
+    .replace(/ +\}/g, '}') // remove space inside }. {a: 1 } -> {a: 1}
+    .replace(/ +;/g, ';')
+    .trim();
 }
 
 function makeSrc(fn) {
   if (typeof fn === 'string') {
     return fn;
   }
-  var src = String(fn).trim();
-  src = src.replace(/^function[^(]*\([^)]*\)\s*{/, '');
-  src = src.replace(/}$/, '');
+  var src = String(fn)
+    .trim()
+    .replace(/^function[^(]*\([^)]*\)\s*{/, '')
+    .replace(/}$/, '');
   return sanitizeSource(src);
 }
 

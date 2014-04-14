@@ -21,8 +21,16 @@ function transform(ast, options) {
   return result;
 }
 
+var codegenDefaultOptions ={
+  moz: {
+    parenthesizedComprehensionBlock: true,
+    comprehensionExpressionStartsWithAssignment: true
+  }
+};
+
 function transformSource(source, transformOptions, codegenOptions) {
   var ast = esprima.parse(source);
+  codegenOptions = codegenOptions || codegenDefaultOptions;
   return escodegen.generate(transform(ast, transformOptions), codegenOptions);
 }
 
