@@ -23,7 +23,6 @@ describe('Destructuring Object', function() {
       }
     );
   });
-
   it('should destruct 1 variable with var', function() {
     assertSrcEquals(
       getComment(function() {/*
@@ -39,7 +38,6 @@ describe('Destructuring Object', function() {
       }
     );
   });
-
   it('should destruct 2 variables', function() {
     assertSrcEquals(
       getComment(function() {/*
@@ -55,7 +53,6 @@ describe('Destructuring Object', function() {
       }
     );
   });
-
   it('should destruct 2 variables with var', function() {
     assertSrcEquals(
       getComment(function() {/*
@@ -71,7 +68,6 @@ describe('Destructuring Object', function() {
       }
     );
   });
-
   it('should destruct and evaluate the expression to the right value',
      function() {
     assertSrcEquals(
@@ -89,7 +85,6 @@ describe('Destructuring Object', function() {
       }
     );
   });
-
   it('should destruct and evaluate the expression to the right value with var',
      function() {
     assertSrcEquals(
@@ -107,7 +102,6 @@ describe('Destructuring Object', function() {
       }
     );
   });
-
   it('should destruct with a yield on the right',
      function() {
     assertSrcEquals(
@@ -128,6 +122,201 @@ describe('Destructuring Object', function() {
         d.value.a === 1 && d.value.b === 2;
       }
     );
+  });
+  it('should destruct with an identifier', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        var b = {a: 3};
+        var {a} = b;
+      */}),
+      function() {
+        var b = {a: 3};
+        var a = b.a;
+      }
+    ).andAssert(
+      function() {
+        a === 3;
+      }
+    );
+  });
+  it('should destruct NewExpression', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        function Constructor() {};
+        Constructor.prototype.a = 3;
+        var {a} = new Constructor();
+      */}),
+      function() {
+        function Constructor() {};
+        Constructor.prototype.a = 3;
+        var $0 = new Constructor(), a = $0.a;
+      }
+    ).andAssert(
+      function() {
+        a === 3;
+      }
+    );
+  });
+  it('should destruct BinaryExpression', function() {
+    Boolean.prototype.a = 12;
+    assertSrcEquals(
+      getComment(function() {/*
+        var {a} = 3 === 3;
+      */}),
+      function() {
+        var $0 = 3 === 3, a = $0.a;
+      }
+    ).andAssert(
+      function() {
+        a === 12;
+      }
+    );
+    delete Boolean.prototype.a;
+  });
+  it('should destruct LogicalExpression', function() {
+    Boolean.prototype.a = 9;
+    assertSrcEquals(
+      getComment(function() {/*
+        var {a} = true && false;
+      */}),
+      function() {
+        var $0 = true && false, a = $0.a;
+      }
+    ).andAssert(
+      function() {
+        a === 9;
+      }
+    );
+    delete Boolean.prototype.a;
+  });
+  it('should destruct ThisExpression', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        var b = function () {
+          var {a} = this;
+          return a;
+        }.call({a: 1});
+      */}),
+      function() {
+        var  b = function () {
+          var $0 = this, a = $0.a;
+          return a;
+        }.call({a: 1});
+      }
+    ).andAssert(
+      function() {
+        b === 1;
+      }
+    );
+  });
+  it('should destruct ConditionalExpression', function() {
+    Number.prototype.a = 7;
+    assertSrcEquals(
+      getComment(function() {/*
+        var {a} = true ? 0 : 1;
+      */}),
+      function() {
+        var $0 = true ? 0 : 1, a = $0.a;
+      }
+    ).andAssert(
+      function() {
+        a === 7;
+      }
+    );
+    delete Number.prototype.a;
+  });
+  it('should destruct UpdateExpression', function() {
+    Number.prototype.a = 7;
+    assertSrcEquals(
+      getComment(function() {/*
+        var b = 3, {a} = b++;
+      */}),
+      function() {
+        var b = 3, $0 = b++, a = $0.a;
+      }
+    ).andAssert(
+      function() {
+        a === 7;
+      }
+    );
+    delete Number.prototype.a;
+  });
+  it('should destruct UnaryExpression', function() {
+    Number.prototype.a = 7;
+    assertSrcEquals(
+      getComment(function() {/*
+        var b = 3, {a} = -b;
+      */}),
+      function() {
+        var b = 3, $0 = -b, a = $0.a;
+      }
+    ).andAssert(
+      function() {
+        a === 7;
+      }
+    );
+    delete Number.prototype.a;
+  });
+  it('should destruct ArrowFunctionExpression', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        var {a} = () => 3;
+      */}),
+      getComment(function() {/*
+        var $0 = () => 3, a = $0.a;
+      */})
+    );
+    // We can't assert yet, Node doesn't support it
+  });
+  it('should destruct ComprehensionExpression', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        var {a} = [++x for (x of [1, 2])];
+      */}),
+      getComment(function() {/*
+        var $0 = [++x for (x of [1, 2])], a = $0.a;
+      */})
+    );
+    // We can't assert yet, Node doesn't support it
+  });
+  // escodegen doesn't support ClassExpression yet,
+  // but everything should already work
+  it.skip('should destruct ClassExpression', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        var {a} = class X{};
+      */}),
+      getComment(function() {/*
+        var $0 = class X{}, a = $0.a;
+      */})
+    );
+    // We can't assert yet, Node doesn't support it
+  });
+  // ast-types doesnt support TemplateLiteral yet
+  it.skip('should destruct TemplateLiteral', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        var {a} = `str`;
+      */}),
+      getComment(function() {/*
+        var $0 = `str`, a = $0.a;
+      */})
+    );
+    // We can't assert yet, Node doesn't support it
+  });
+  // ast-types doesnt support TaggedTemplateExpression yet
+  it.skip('should destruct TaggedTemplateExpression', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        function b(){};
+        var {a} = b`str`;
+      */}),
+      getComment(function() {/*
+        function b(){};
+        var $0 = b`str`, a = $0.a;
+      */})
+    );
+    // We can't assert yet, Node doesn't support it
   });
 
 });
