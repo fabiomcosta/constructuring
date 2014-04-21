@@ -896,8 +896,8 @@ describe('Destructuring Array', function() {
       },
       function() {
         var $0, $1;
-        $1 = ($0 = [1, 2], a = $0[0], b = $0[1], $0),
-          c = $1[0], d = $1[1], $1;
+        $0 = ($1 = [1, 2], a = $1[0], b = $1[1], $1),
+          c = $0[0], d = $0[1], $0;
       }
     ).andAssert(
       function() {
@@ -912,11 +912,12 @@ describe('Destructuring Array', function() {
         var [c, d] = [a, b] = [1, 2];
       */}),
       // ideally for readability
-      // var $0, $1 = ($0 = [1, 2], a = $0[0], b = $0[1], $0),
-      //   c = $1[0], d = $1[1];
+      // var $1, $0 = ($1 = [1, 2], a = $1[0], b = $1[1], $1),
+      //   c = $0[0], d = $0[1];
       function() {
-        var $1 = ($0 = [1, 2], a = $0[0], b = $0[1], $0),
-          c = $1[0], d = $1[1], $0;
+        var $1;
+        var $0 = ($1 = [1, 2], a = $1[0], b = $1[1], $1),
+          c = $0[0], d = $0[1];
       }
     ).andAssert(
       function() {

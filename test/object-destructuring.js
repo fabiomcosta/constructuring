@@ -76,8 +76,8 @@ describe('Destructuring Object', function() {
       */}),
       function() {
         var $0, $1;
-        $1 = ($0 = {a: 1, b: 2, c: 3, d: 4}, a = $0.a, b = $0.b, $0),
-          c = $1.c, d = $1.d, $1;
+        $0 = ($1 = {a: 1, b: 2, c: 3, d: 4}, a = $1.a, b = $1.b, $1),
+          c = $0.c, d = $0.d, $0;
       }
     ).andAssert(
       function() {
@@ -91,10 +91,9 @@ describe('Destructuring Object', function() {
       getComment(function() {/*
         var {b} = {a} = {a: 1, b: 2};
       */}),
-      // ideally for readability
-      // var $0, $1 = ($0 = {a: 1, b: 2}, a = $0.a, $0), b = $1.b;
       function() {
-        var $1 = ($0 = {a: 1, b: 2}, a = $0.a, $0), b = $1.b, $0;
+        var $1;
+        var $0 = ($1 = {a: 1, b: 2}, a = $1.a, $1), b = $0.b;
       }
     ).andAssert(
       function() {
@@ -123,7 +122,7 @@ describe('Destructuring Object', function() {
       }
     );
   });
-  it('should destruct with an identifier', function() {
+  it('should destruct Identifier', function() {
     assertSrcEquals(
       getComment(function() {/*
         var b = {a: 3};
@@ -136,6 +135,70 @@ describe('Destructuring Object', function() {
     ).andAssert(
       function() {
         a === 3;
+      }
+    );
+  });
+  it('should destruct MemberExpression', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        var b = {a: {a: 1}};
+        var {a} = b.a;
+      */}),
+      function() {
+        var b = {a: {a: 1}};
+        var $0 = b.a, a = $0.a;
+      }
+    ).andAssert(
+      function() {
+        a === 1;
+      }
+    );
+  });
+  it('should destruct SequenceExpression', function() {
+    Number.prototype.a = 8;
+    assertSrcEquals(
+      getComment(function() {/*
+        var {a} = (b = 3);
+      */}),
+      function() {
+        var $0 = b = 3, a = $0.a;
+      }
+    ).andAssert(
+      function() {
+        a === 8 && b === 3;
+      }
+    );
+    delete Number.prototype.a;
+  });
+  it('should destruct Literal', function() {
+    Number.prototype.a = 8;
+    assertSrcEquals(
+      getComment(function() {/*
+        var {a} = 1;
+      */}),
+      function() {
+        var $0 = 1, a = $0.a;
+      }
+    ).andAssert(
+      function() {
+        a === 8;
+      }
+    );
+    delete Number.prototype.a;
+  });
+  it('should destruct CallExpression', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        function b() {return {a: 1};};
+        var {a} = b();
+      */}),
+      function() {
+        function b() {return {a: 1};};
+        var $0 = b(), a = $0.a;
+      }
+    ).andAssert(
+      function() {
+        a === 1;
       }
     );
   });
