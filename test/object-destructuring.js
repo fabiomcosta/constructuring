@@ -38,6 +38,36 @@ describe('Destructuring Object', function() {
       }
     );
   });
+  it('should destruct variable with defined name', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        ({a: b}) = {a: 1};
+      */}),
+      // ideally b = 1;
+      function() {
+        var $0; $0 = {a: 1}, b = $0.a, $0;
+      }
+    ).andAssert(
+      function() {
+        b === 1;
+      }
+    );
+  });
+  it('should destruct variable with defined name with var', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        var {a: b} = {a: 1};
+      */}),
+      // ideally var b = 1;
+      function() {
+        var $0 = {a: 1}, b = $0.a;
+      }
+    ).andAssert(
+      function() {
+        a === 1;
+      }
+    );
+  });
   it('should destruct 2 variables', function() {
     assertSrcEquals(
       getComment(function() {/*
