@@ -17,7 +17,8 @@ describe('Destructuring Function Arguments', function() {
       */}),
       function() {
         var $0 = function ($1) {
-          var c = $1[0], d = $1[1], garbage = 88;
+          var c = $1[0], d = $1[1];
+          var garbage = 88;
           return [c, d];
         }([1, 2]), a = $0[0], b = $0[1];
       }
@@ -46,8 +47,7 @@ describe('Destructuring Function Arguments', function() {
       }
     );
   });
-  it('should destruct function arguments making sure the arguments ' +
-     '"array" is correct', function() {
+  it('should destruct making sure `arguments` is correct', function() {
     assertSrcEquals(
       getComment(function() {/*
         var a = function ([b, c]) {
