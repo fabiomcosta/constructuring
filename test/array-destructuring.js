@@ -13,7 +13,7 @@ describe('Destructuring Array', function() {
         [a] = [1];
       },
       // ideally a = 1;
-      // ^ kinda complicated because you have to make the return
+      // ^ kinda complicated because you have to make sure the return
       // value is discarded. (just like all the next Assignment test cases)
       function() {
         var $0; $0 = [1], a = $0[0], $0;
@@ -795,45 +795,6 @@ describe('Destructuring Array', function() {
       // you'll need node devel for this
       function() {
         d.value[0] === 1 && d.value[1] === 2;
-      }
-    );
-  });
-  it('should destruct function arguments', function() {
-    assertSrcEquals(
-      getComment(function() {/*
-        var [a, b] = function ([c, d]) {
-          var garbage = 88;
-          return [c, d];
-        }([1, 2]);
-      */}),
-      function() {
-        var $0 = function ($1) {
-          var c = $1[0], d = $1[1], garbage = 88;
-          return [c, d];
-        }([1, 2]), a = $0[0], b = $0[1];
-      }
-    ).andAssert(
-      function() {
-        a === 1 && b === 2;
-      }
-    );
-  });
-  it('should destruct function arguments nested', function() {
-    assertSrcEquals(
-      getComment(function() {/*
-        var [a, b] = function ([c, [d, e]]) {
-          return [c, d];
-        }([1, 2]);
-      */}),
-      function() {
-        var $0 = function ($1) {
-          var c = $1[0], $2 = $1[1], d = $2[0], e = $2[1];
-          return [c, d];
-        }([1, 2]), a = $0[0], b = $0[1];
-      }
-    ).andAssert(
-      function() {
-        a === 1 && b === [][0];
       }
     );
   });
