@@ -1100,5 +1100,19 @@ describe('Destructuring Array', function() {
       }
     );
   });
+  it('should destruct with elision', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        var [a, ...b] = [1, 2, 3];
+      */}),
+      function() {
+        var $0 = [1, 2, 3], a = $0[0], b = $0.slice(1);
+      }
+    ).andAssert(
+      function() {
+        a === 1 && b[0] === 2 && b[1] === 3;
+      }
+    );
+  });
 });
 
