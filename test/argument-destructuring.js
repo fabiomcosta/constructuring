@@ -85,4 +85,19 @@ describe('Destructuring Function Arguments', function() {
       }
     );
   });
+  it('should destruct arguments from ArrowFunctionExpression',
+      function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        var [a, b] = (({c, d}) => [c, d])({c: 1, d: 2});
+      */}),
+      getComment(function() {/*
+        var $0 = ($1 => {
+          var c = $1.c, d = $1.d;
+          return [c, d];
+        })({c: 1, d: 2}), a = $0[0], b = $0[1];
+      */})
+    );
+    // We can't assert yet, Node doesn't support it
+  });
 });
