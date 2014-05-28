@@ -13,6 +13,6 @@ NOTE: this module works only with node 0.11.x with the `--harmony` flag.
 
 Make sure you install [mocha](http://visionmedia.github.io/mocha/#installation) then run:
 
-```bash
+```
 mocha --harmony
 ```
