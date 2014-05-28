@@ -1,5 +1,6 @@
 {
   "name": "constructuring",
+  "repository": "https://github.com/fabiomcosta/constructuring.git",
   "version": "0.0.1",
   "description": "ES6 to ES3 transpiler of the destructuring feature",
   "main": "index.js",
@@ -8,10 +9,13 @@
   },
   "dependencies": {
     "escodegen": "~1.3.0",
-    "esprima": "git://github.com/ariya/esprima.git#harmony",
-    "estraverse": "~1.5.0"
+    "ast-types": "~ast-types-0.3.29",
+    "esprima": "git://github.com/ariya/esprima.git#harmony"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "mocha": "~1.18.2",
+    "chai": "~1.9.1"
+  },
   "scripts": {
     "test": "mocha --harmony"
   },
