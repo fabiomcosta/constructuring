@@ -1,7 +1,7 @@
 {
   "name": "constructuring",
   "repository": "https://github.com/fabiomcosta/constructuring.git",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "ES6 to ES3 transpiler of the destructuring feature",
   "main": "index.js",
   "directories": {
