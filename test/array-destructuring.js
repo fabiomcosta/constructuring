@@ -784,13 +784,13 @@ describe('Destructuring Array', function() {
           return [a, b];
         }([1, 2]), d = c.next();
       */}),
-      function() {
+      getComment(function() {/*
         var c = function* (b) {
           var $0 = yield b, a = $0[0], b = $0[1];
           return [a, b];
         }([1, 2]), d = c.next();
-      }
-    ).andAssert(
+      */})
+    ).andAssertIf(
       // you'll need node devel for this
       function() {
         d.value[0] === 1 && d.value[1] === 2;

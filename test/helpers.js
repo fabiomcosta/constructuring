@@ -50,8 +50,17 @@ function assertSrcEquals(referenceFn, compareFn) {
   var referenceSrc = makeSrc(referenceFn);
   var transformedReferenceSrc = sanitizeSource(transformSource(referenceSrc, codegenOptions));
   var compareSrc = makeSrc(compareFn);
+
   assert.strictEqual(transformedReferenceSrc, compareSrc);
+
   return {
+    andAssertIf: function (assertFn) {
+      try {
+        this.andAssert(assertFn);
+      } catch (e) {
+        if (!(e instanceof SyntaxError)) throw e;
+      }
+    },
     andAssert: function(assertFn) {
       var assertSrc = makeSrc(assertFn);
       if (supportsDestructuring) {
