@@ -140,13 +140,13 @@ describe('Destructuring Object', function() {
           return {a: a, b: b};
         }({a: 1, b: 2}), d = c.next();
       */}),
-      function() {
+      getComment(function() {/*
         var c = function* (b) {
           var $0 = yield b, a = $0.a, b = $0.b;
           return {a: a, b: b};
         }({a: 1, b: 2}), d = c.next();
-      }
-    ).andAssert(
+      */})
+    ).andAssertIf(
       function() {
         d.value.a === 1 && d.value.b === 2;
       }
