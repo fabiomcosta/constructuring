@@ -35,5 +35,5 @@ console.log(escodegen.generate(ast));
 Make sure you install [mocha](http://visionmedia.github.io/mocha/#installation) then run:
 
 ```
-mocha --harmony
+mocha
 ```
