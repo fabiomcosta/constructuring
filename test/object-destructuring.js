@@ -68,6 +68,22 @@ describe('Destructuring Object', function() {
       }
     );
   });
+  it('should destruct variable with literal name', function() {
+    assertSrcEquals(
+      getComment(function() {/*
+        ({'foo-bar': b}) = {'foo-bar': 1};
+      */}),
+      // ideally b = 1;
+      function() {
+        var $0; $0 = {'foo-bar': 1}, b = $0['foo-bar'], $0;
+      }
+    ).andAssert(
+      function() {
+        b === 1;
+      }
+    );
+  });
+
   it('should destruct 2 variables', function() {
     assertSrcEquals(
       getComment(function() {/*
