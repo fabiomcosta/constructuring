@@ -2,7 +2,7 @@
 
 ## About
 
-Constructuring is a ndoe module that transforms Javascript code that uses ES6's
+Constructuring is a node module that transforms Javascript code that uses ES6's
 destructuring feature into code that runs on today's browsers.
 
 ## Example
